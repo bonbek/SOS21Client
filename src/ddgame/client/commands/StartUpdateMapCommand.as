@@ -121,9 +121,9 @@ package ddgame.client.commands {
 					{
 						asseturl = dtile.assets[nasset];
 						// Patch mur ou objet plat
-						if ((dtile.width < 1 && dtile.depth > .1) || dtile.height < .1 || (dtile.depth < .1 && dtile.width > 1))
-							libProxy.addTileAssetLoader(asseturl, false);
-						else
+//						if ((dtile.width < .1 && dtile.depth > .1) || dtile.height < .1 || (dtile.depth < .1 && dtile.width > 1))
+//							libProxy.addTileAssetLoader(asseturl, false);
+//						else
 							libProxy.addTileAssetLoader(asseturl);
 					}
 				}

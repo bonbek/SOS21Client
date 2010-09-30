@@ -384,7 +384,7 @@ package ddgame.client.proxy {
 		}
 		
 		// TODO
-		public function findTrigger(id:String):void
+		public function findTrigger (id:String) : void
 		{
 			
 		}
@@ -393,15 +393,18 @@ package ddgame.client.proxy {
 		 *	Retrouve un trigger actif de la map
 		 *	courante depuis son identifiant
 		 */
-		public function findActiveTrigger(id:int):void
+		public function findActiveTrigger (id:int) : ITrigger
 		{
+			for (var at:Object in tileTriggerInstances)
+				if (at.properties.id  == id) return at as ITrigger;
 			
+			return null;
 		}
 		
 		/**
 		 *	// TODO
 		 */
-		public function removeMapTriggers(mapId:int):void
+		public function removeMapTriggers (mapId:int) : void
 		{
 			
 		}
@@ -720,8 +723,47 @@ package ddgame.client.proxy {
 			trigger.sourceTarget = sourceObj;*/
 
 			if (event.isDefaultPrevented()) return;
+						
+			switch (event.type)
+			{
+				case TriggerEvent.EXECUTE :
+				{
+					// incrémentation nombre d'execution
+					trigger.properties.fireCount++;					
+					// on lance les overrides
+					writeOverrideTrigger(trigger, 0);
+					break;
+				}
+				case TriggerEvent.COMPLETE :
+				{
+					// on lance les overrides
+					writeOverrideTrigger(trigger, 1);
+					// lancement des triggers chainés
+					var linkTriggerProps:TriggerProperties = TriggerProperties.linkedTriggerList[trigger.properties.id];
+					if (linkTriggerProps is TriggerProperties)
+					{
+						launchTrigger(linkTriggerProps);
+					}
+					else if (trigger.isPropertie("onComplete"))
+					{
+						var tlist:Array = String(trigger.getPropertie("onComplete")).split(",");
+						var l:int = tlist.length;
+						for (var i:int = 0; i < l; i++)
+							launchTriggerByID(tlist[i]);
+					}
+					break;
+				}
+				case TriggerEvent.CANCELED :
+				{
+					// on lance les overrides
+					writeOverrideTrigger(trigger, 2);
+					break;
+				}
+				default :
+				{ break; }
+			}
 			
-			if (event.type == TriggerEvent.COMPLETE)
+			/*if (event.type == TriggerEvent.COMPLETE)
 			{
 				// incrémentation du nombre d'éxcutions
 //				trigger.properties.exec++;
@@ -731,7 +773,11 @@ package ddgame.client.proxy {
 				// injection de propriétés dans un autre trigger
 				// argument ovTrig "override trigger" :
             // 	- type:Array
-				//		- entrées : eid|tid|prop|val|prop|val...
+				//		- entrées : evnt|eid|tid|prop|val|prop|val...
+				//				evnt	actif depuis
+				//						0 l'injection se fera à l'init du trigger
+				//						1 l'injection se fera àu complete du trigger
+				//						2 l'injection se fera àu cancel du trigger
 				//				eid	identifiant execution, -1 pour que l'écrasement des propriétées se
 				//						fasse à chaque fois
 				//				tid 	identifiant du trigger sur lequel les propriétées / arguments seront remplacées
@@ -765,7 +811,6 @@ package ddgame.client.proxy {
 							}
 						}
 					}
-					
 				}
 				
 				// lancement des triggers chainés
@@ -785,7 +830,7 @@ package ddgame.client.proxy {
 			else
 			{
 				// on est sur un trigger annulé
-			}
+			}*/
 			// nettoyage
 //			trigger.release();
 			
@@ -794,6 +839,55 @@ package ddgame.client.proxy {
 		//--------------------------------------
 		//  PRIVATE & PROTECTED INSTANCE METHODS
 		//--------------------------------------
+		
+		// injection de propriétés dans un autre trigger
+		// argument ovTrig "override trigger" :
+      // 	- type:Array
+		//		- entrées : evnt|eid|tid|prop|val|prop|val...
+		//				evnt	actif depuis
+		//						0 l'injection se fera à l'init du trigger
+		//						1 l'injection se fera àu complete du trigger
+		//						2 l'injection se fera àu cancel du trigger
+		//				eid	identifiant execution, -1 pour que l'écrasement des propriétées se
+		//						fasse à chaque fois
+		//				tid 	identifiant du trigger sur lequel les propriétées / arguments seront remplacées
+		//				prop	propriété argument à remplacer
+		//				val	valeur de remplacement
+		//		ex:
+		//			_ovT
+		//				- 1|3|maxFireCount|0  	< à toutes les exec le trigger va mettre la prop maxFireCount du trigger 3 à 0
+		//				- 3|2|url|toto.com		< à la 3 exec le trigger va mettre la prop url à toto.com
+		private function writeOverrideTrigger (trigger:ITrigger, evt:int) : void
+		{
+			var ova:Array = trigger.getPropertie("_ovT");
+			if (ova)
+			{		
+				var o:Array;
+				var toi:Object;
+				var indCount:int;
+				var fc:int = trigger.properties.fireCount;
+
+				for each (var ov:Object in ova)
+				{
+					o = ov.split("|");
+					// on regarde si l'evnt type ecr&sement correspond (execute, complete ou cancel)
+					if (int(o.shift()) != evt) continue;
+				
+					// on regarde si le fireCount actuel correspond au "remplacement"
+					indCount = o.shift();
+					if (indCount == fc || indCount == 0) // firecount corespond ou override est chaque exec
+					{
+						// recup du trigger à overrider
+						toi = getTrigger(o.shift());
+						if (toi)
+						{
+							for (var j:int = 0; j < o.length; j+=2)
+								toi.setArgument(o[j], o[j+1]);
+						}
+					}
+				}
+			}
+		}
 				
 		/**
 		 *	@private
@@ -831,7 +925,7 @@ package ddgame.client.proxy {
 			// timer = new Timer();
 			
 			
-//			channel.addEventListener(TriggerEvent.EXECUTE, triggerHandler, false, 10, true);
+			channel.addEventListener(TriggerEvent.EXECUTE, triggerHandler);
 			channel.addEventListener(TriggerEvent.COMPLETE, triggerHandler);
 			channel.addEventListener(TriggerEvent.CANCELED, triggerHandler);
 			

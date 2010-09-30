@@ -236,7 +236,8 @@ package ddgame.client.triggers {
 		 *	(voir fireTypeList)
 		 */				
 		public function get fireEventType():String
-		{ 
+		{
+//			if (_fireType == -1) return "chained";
 			return fireTypeList[_fireType];
 		}
 		

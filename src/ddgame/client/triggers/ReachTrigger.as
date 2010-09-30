@@ -66,7 +66,7 @@ package ddgame.client.triggers {
 			
 			if (getPropertie("txt")) createStickie();
 			
-			channel.addEventListener(TriggerEvent.COMPLETE, handleEvent);
+			channel.addEventListener(TriggerEvent.EXECUTE, handleEvent);
 			stage.addEventListener(Event.ENTER_FRAME, handleEvent);
 			
 			stime = getTimer();
@@ -118,15 +118,21 @@ package ddgame.client.triggers {
 		{
 			switch (e.type)
 			{
-				case TriggerEvent.COMPLETE :
+				case TriggerEvent.EXECUTE :
+				{
 					if (tlist.indexOf(String(TriggerEvent(e).trigger.properties.id)) > -1) tcount++;			
 					if (tcount >= rcount) complete();
 					break;
+				}
 				case Event.ENTER_FRAME :
+				{
 					var etime:int = getTimer() - stime;
-					if (etime >= ltime ) {
+					if (etime >= ltime )
+					{
 						uncomplete();
-					} else {
+					}
+					else
+					{
 						var perc:Number = (etime / ltime) * 100;
 						// option effet tremblement
 						if (getPropertie("fxt"))
@@ -140,8 +146,9 @@ package ddgame.client.triggers {
 						uiHelper.component.timeBubbleWgt.percentFill = perc;
 					}
 					break;
+				}
 				default :
-					break;
+				{ break; }
 			}
 		}
 		
@@ -173,6 +180,9 @@ package ddgame.client.triggers {
 			stickie = new Sprite();
 			stickie.graphics.beginFill(0xFF0092);
 			stickie.graphics.drawRoundRect(0, 0, t.width + dmargin, t.height + dmargin, 6);
+			stickie.graphics.moveTo(t.width + dmargin + 4, 0);
+			stickie.graphics.lineTo(t.width + dmargin + 20, (t.height + dmargin) / 2);
+			stickie.graphics.lineTo(t.width + dmargin + 4 , t.height + dmargin);
 			stickie.graphics.endFill();
 			stickie.filters = [new DropShadowFilter(4, 45, 0, .5)];
 			stickie.addChild(t);
@@ -193,7 +203,7 @@ package ddgame.client.triggers {
 		{			
 			AudioHelper(facade.getObserver(AudioHelper.NAME)).removeSound(sndFxUrl);
 			stage.removeEventListener(Event.ENTER_FRAME, handleEvent);
-			channel.removeEventListener(TriggerEvent.COMPLETE, handleEvent);
+			channel.removeEventListener(TriggerEvent.EXECUTE, handleEvent);
 		}
 		
 		protected function uncomplete () : void
@@ -202,12 +212,23 @@ package ddgame.client.triggers {
 			TweenMax.to(stickie, 0.8, {delay:.2, y:stickie.y + 300, rotation:80, alpha:0, ease:Strong.easeIn, onComplete:stage.removeChild, onCompleteParams:[stickie]});
 			uiHelper.component.timeBubbleWgt.empty();
 			sndFx.stop();
-			//sndFx.load("sounds/fx/alarmLoose.mp3");
-			//sndFx.play(0, 1);
-
+			
+			var proxy:TileTriggersProxy = triggerProxy;
+			// annulation des triggers
+			// patch quand un trigger à éxecuter prend en compte un déplacement de bob :
+			// bob se déplace, il n'atteint pas le trigger à atteindre dans le temps imparti, le trigger d'annulation
+			// se lance, mais aussi celui à atteindre
+			var t:AbstractTrigger;
+			for each (var tid:int in tlist)
+			{
+				t = triggerProxy.findActiveTrigger(tid) as AbstractTrigger;
+				if (t) t.cancel();
+			}			
+			
+			// lancement du trigger définit pour "le(s) action(s) n'ont pas été(s) effectuées"
 			var tid:int = getPropertie("fail");
 			if (tid)
-				TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)).launchTriggerByID(tid);
+				triggerProxy.launchTriggerByID(tid);
 
 			_release();
 			super.cancel();
@@ -225,10 +246,17 @@ package ddgame.client.triggers {
 			super.complete();
 		}
 		
+		/**
+		 * Ref TileTriggersProxy
+		 */
+		protected function get triggerProxy () : TileTriggersProxy
+		{ return TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)); }
+		
+		/**
+		 * Ref UIHelper
+		 */
 		protected function get uiHelper () : UIHelper
-		{
-			return UIHelper(facade.getObserver(HelperList.UI_HELPER));
-		}
+		{ return UIHelper(facade.getObserver(HelperList.UI_HELPER)); }
 		
 	}
 

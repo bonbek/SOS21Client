@@ -68,10 +68,6 @@ package ddgame.client.triggers {
 		//  CONSTRUCTOR
 		//--------------------------------------
 
-		public function AbstractTrigger()
-		{
-		}
-
 		//--------------------------------------
 		//  PRIVATE VARIABLES
 		//--------------------------------------
@@ -80,32 +76,34 @@ package ddgame.client.triggers {
 		protected var _properties:Object;
 		protected var _starget:Object;
 		protected var _differer:Object;
+		protected var _canceled:Boolean = false;
 		
 		//--------------------------------------
 		//  GETTER/SETTERS
 		//--------------------------------------
 		
-		public function get classID():int {
+		public function get classID () : int
+		{
 			trace("!! le getter classID doit être implémenter dans la classe concrète ", this);
 			return CLASS_ID;
 		}
 		
-		public function set sourceTarget(val:Object) : void
+		public function set sourceTarget (val:Object) : void
 		{
 			_starget = val;
 		}
 		
-		public function get sourceTarget() : Object
+		public function get sourceTarget () : Object
 		{
 			return _starget;
 		}
 		
-		public function set properties(val:Object) : void
+		public function set properties (val:Object) : void
 		{ 
 			_properties = val;
 		}
 		
-		public function get properties():Object 
+		public function get properties () : Object 
 		{ 
 			return _properties;
 		}
@@ -114,27 +112,44 @@ package ddgame.client.triggers {
 		//  PUBLIC METHODS
 		//--------------------------------------
 		
-		public function isPropertie(prop:String):Boolean
-		{
-			return _properties.arguments[prop] != null;
-		}
+		public function isPropertie (prop:String) : Boolean
+		{ return _properties.arguments[prop] != null; }
 		
+		/**
+		 *	Retourne une propriété
+		 *	@return 
+		 */
 		public function getPropertie (prop:String) : *
-		{
-			return _properties.arguments[prop];
-		}
+		{ return _properties.arguments[prop]; }
 		
-		public function setPropertie(prop:String, val:*):void
-		{
-			_properties.arguments[prop] = val;
-		}
+		/**
+		 * Définit une propriété
+		 *	@param prop String
+		 *	@param val *
+		 */
+		public function setPropertie (prop:String, val:*) : void
+		{ _properties.arguments[prop] = val; }
 		
-		public function cancel() : void
+		/**
+		 *	Annule l'execution du trigger
+		 */
+		public function cancel () : void
 		{
+				// abonnement sur bob pour lancer réelement le trigger
+			if (waitPlayerMove())
+			{
+				var bob:AbstractTile = AbstractTile.getTile("bob");
+				bob.removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
+				bob.stop();
+				bob.gotoAndStop("stand");
+			}
+
+			_canceled = true;
 			sendEvent(new TriggerEvent(TriggerEvent.CANCELED, this));
 		}
 		
 		/**
+		 * @private
 		 * Nettoyage
 		 */
 		public function release () : void
@@ -144,14 +159,19 @@ package ddgame.client.triggers {
 			_differer = null;
 		}
 		
+		/**
+		 * Retourne la référence du stage
+		 */
+		public function get stage() : Stage
+		{  return AbstractHelper.stage.stage; }
+		
+		/**
+		 * TODO à supprimer ?
+		 *	@param evtType String
+		 */
 		public function differ (evtType:String) : void
 		{
 //			_differer = new TriggerDifferer(evtType, channel, this);
-		}
-		
-		public function get stage() : Stage
-		{ 
-			return AbstractHelper.stage.stage;
 		}
 		
 		//--------------------------------------
@@ -159,14 +179,12 @@ package ddgame.client.triggers {
 		//--------------------------------------
 		
 		public function execute (event:Event = null) : void
-		{
-//			trace(".execute() should be implemented in your subClass@" + toString());
-		}
+		{ trace(".execute() should be implemented in your subClass@" + toString()); }
 		
 		public function initialize () : void
 		{
 			// TODO, passer ça dans AbstractExternalTrigger
-			var evtType:String = properties.fireEventType;
+			var evtType:String = properties.fireType == -1 ? "chained" : properties.fireEventType;
 			if (evtType != null)
 			{
 				var tevent:TriggerEvent = new TriggerEvent(evtType, this, true, true);
@@ -201,7 +219,7 @@ package ddgame.client.triggers {
 			// abonnement clique sur ecène annule, pour annuler le déplacement
 			IsosceneHelper(facade.getObserver(IsosceneHelper.NAME)).component.removeEventListener(MouseEvent.MOUSE_DOWN, onMoveBob);
 			// abonnement sur bob pour lancer réelement le trigger
-			AbstractTile.getTile("bob").removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
+			// AbstractTile.getTile("bob").removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
 			
 			switch (e.type)
 			{
@@ -211,6 +229,8 @@ package ddgame.client.triggers {
 					break;
 				// fin du déplacement de bob
 				case TileEvent.MOVE_COMPLETE :
+					// abonnement sur bob pour lancer réelement le trigger
+					AbstractTile.getTile("bob").removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
 					_execute();
 					break;
 			}
@@ -251,7 +271,7 @@ package ddgame.client.triggers {
 				sendEvent(new BaseEvent(EventList.MOVE_TILE, {tile:bob, cellTarget:tpoint}));
 				
 			} else { w = false; }
-			
+
 			return w;
 //			sendEvent(new Event(EventList.FREEZE_SCENE));
 		}
@@ -272,8 +292,10 @@ package ddgame.client.triggers {
 		private function _execute () : void
 		{
 			// TODO un argument _fs "freeze screen" en option native, comme _mb (move bob) ?
-			execute(new Event(Event.INIT));
+			if (_canceled) return;
+
 			sendEvent(new TriggerEvent(TriggerEvent.EXECUTE, this));
+			execute();
 		}
 		
 		

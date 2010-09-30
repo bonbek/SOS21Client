@@ -11,6 +11,7 @@ package ddgame.client.proxy {
 	import com.sos21.tileengine.display.TileView;
 	import com.sos21.tileengine.display.ITileView;
 	import ddgame.client.proxy.ProxyList;
+	import ddgame.client.proxy.DatamapProxy;
 	import com.sos21.tileengine.structures.UPoint;
 	
 	
@@ -63,7 +64,9 @@ package ddgame.client.proxy {
 		 */
 		public function createUPoint(x:Number = 0, y:Number = 0, z:Number = 0):UPoint
 		{
-			return new UPoint(x, y, z);
+			var datamap:DatamapProxy = facade.getProxy(DatamapProxy.NAME) as DatamapProxy;
+			
+			return new UPoint(x, y, z, datamap.tilew, datamap.tiled, datamap.tileh);
 		}
 		
 		/**
@@ -93,8 +96,9 @@ package ddgame.client.proxy {
 		 *	@return AbstractTile
 		 */
 		public function createAbstractTile(sid:String, x:Number, y:Number, z:Number, view:ITileView):AbstractTile
-		{			
-			return new AbstractTile(sid, new UPoint(x, y, z, 60, 30, 30, 0, 0, 0), view);
+		{
+			var datamap:DatamapProxy = facade.getProxy(DatamapProxy.NAME) as DatamapProxy;
+			return new AbstractTile(sid, new UPoint(x, y, z, datamap.tilew, datamap.tiled, datamap.tileh), view);
 		}
 		
 		/**

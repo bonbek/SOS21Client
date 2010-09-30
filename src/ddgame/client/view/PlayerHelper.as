@@ -205,11 +205,11 @@ package ddgame.client.view {
 			var cl:Class = libProxy.getDefinitionFrom("sprites/AvatarSkins.swf", _skin.className);
 			var mc:MovieClip = new cl();
 			
-			// --> Patch pour scale du perso
+			// --> Patch pour scale du perso 
 			/*var factor:Number = dataMap.avatarFactor;
 			mc.scaleX = mc.scaleY = factor;
 			mc.y = dataMap.tileh / 2;*/
-			
+
 			// <--
 			
 			var tv:MCTileView = new MCTileView(mc);
@@ -241,7 +241,10 @@ package ddgame.client.view {
 			tview.y = dataMap.tileh / 2;
 			component.speed = 90 * factor;
 			// < --
-
+			
+			component.upos.xFactor = dataMap.tilew;
+			component.upos.yFactor = dataMap.tiled;
+			component.upos.zFactor = dataMap.tileh;
 			component.upos.matchPos(dataMap.entryPoint);
 			IsosceneHelper(facade.getObserver(IsosceneHelper.NAME)).addAvatar(component);
 

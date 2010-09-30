@@ -24,6 +24,7 @@ package ddgame.view {
 	import ddgame.sound.AudioHelper;
 	
 	import ddgame.vo.IBonus;
+	import ddgame.client.view.IsosceneHelper;
 
 	/**
 	 *	Helper interface utilisateur
@@ -120,15 +121,14 @@ package ddgame.view {
 				component.updateBonus(2, 0);
 				component.updateBonus(3, 0);
 				component.updateBonus(4, 0);
-				
-				// bouton paramètres désactivé pour l'instant
-				component.parametersButton.enabled = false;
+
 				component.compassButton.addEventListener(MouseEvent.MOUSE_UP, handleButtonEvent);
 				component.soundButton.addEventListener(MouseEvent.MOUSE_UP, handleButtonEvent);
 				component.parametersButton.addEventListener(MouseEvent.MOUSE_UP, handleButtonEvent);
 				component.weblinkButton.addEventListener(MouseEvent.MOUSE_UP, handleButtonEvent);
 				// écoute event composant
 				component.addEventListener(UIEvent.TOOLTIP_CREATE, handleToolTipCreate);
+				component.addEventListener(UIEvent.CLOSE_HELPSCREEN, onCloseHelpScreen);
 															
 			}
 		}
@@ -159,6 +159,11 @@ package ddgame.view {
 					e.data = dt;
 					break;
 				}
+				case component.parametersButton :
+				{
+					e.data = component.helpScreen ? "fermer l'aide" : "afficher l'aide";
+					break;
+				}
 				case component.soundButton :
 				{
 					e.data = component.soundButton.selected ? "couper le son" : "activer le son";
@@ -180,19 +185,31 @@ package ddgame.view {
 //					sendEvent(new BaseEvent("addBonus", {theme:3, bonus:10}));
 					break;					
 				case component.soundButton :
-					if (btn.selected) {
-						audioHelper.muteMusic();
-					} else {
+					if (btn.selected) audioHelper.muteMusic();
+					else
 						audioHelper.unMuteMusic();
-					}
 					break;
 				case component.parametersButton :
-					trace(this, "parametersButton ", e.type);
+					if (btn.enabled && !component.helpScreen) {
+						component.openHelpScreen();
+						isosceneHelper.freezeScene();
+					} else {
+						component.closeHelpScreen();
+					}
 					break;
 				case component.weblinkButton :
 					flash.net.navigateToURL(new URLRequest("http://www.sos-21.com"), "_blank");					
 					break;				
 			}
+		}
+		
+		/**
+		 * Réception event écran d'aide fermé
+		 *	@param e Event
+		 */
+		private function onCloseHelpScreen (e:Event) : void
+		{
+			isosceneHelper.unfreezeScene();
 		}
 		
 		/**
@@ -282,7 +299,16 @@ package ddgame.view {
 		{
 			return facade.getObserver(AudioHelper.NAME) as AudioHelper;
 		}
-				
+		
+		/**
+		 * @private
+		 * Ref IsosceneHelper
+		 */
+		private function get isosceneHelper () : IsosceneHelper
+		{
+			return facade.getObserver(IsosceneHelper.NAME) as IsosceneHelper
+		}
+		
 		/**
 		 * @inheritDoc
 		 */

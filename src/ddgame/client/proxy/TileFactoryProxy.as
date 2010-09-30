@@ -125,8 +125,6 @@ package ddgame.client.proxy {
 					
 					// check de l'extension 
 //					trace(furl.substring(furl.length - 3, furl.length));
-					
-					
 
 					if (o.pnj)
 					{
