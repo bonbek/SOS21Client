@@ -117,7 +117,7 @@ package ddgame.client.view {
 		override public function initialize():void
 		{
 			defaultInit();
- 			timer = new Timer(15000, 1);
+ 			timer = new Timer(60000, 1);
 			timer.addEventListener(TimerEvent.TIMER, handleEvent);
 		}
 		

@@ -136,7 +136,7 @@ package ddgame.client.triggers {
 		public function cancel () : void
 		{
 				// abonnement sur bob pour lancer réelement le trigger
-			if (waitPlayerMove())
+			if (getPropertie("_mb"))
 			{
 				var bob:AbstractTile = AbstractTile.getTile("bob");
 				bob.removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
@@ -293,7 +293,16 @@ package ddgame.client.triggers {
 		{
 			// TODO un argument _fs "freeze screen" en option native, comme _mb (move bob) ?
 			if (_canceled) return;
-
+			
+			// on regarde si il faut stopper bob
+			if (getPropertie("_sb"))
+			{
+				var bob:AbstractTile = AbstractTile.getTile("bob");
+				bob.removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
+				bob.stop();
+				bob.gotoAndStop("stand");
+			}
+			
 			sendEvent(new TriggerEvent(TriggerEvent.EXECUTE, this));
 			execute();
 		}
