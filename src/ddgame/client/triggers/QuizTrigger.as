@@ -83,47 +83,27 @@ package ddgame.client.triggers {
 		 */
 		override public function execute(event:Event = null):void
 		{
-			if (event.type != NEXT) // First call, store data quiz id
+			if (!event) // First call, store data quiz id
 			{
 				// liste des qcm
 				_queue = String(properties.arguments["id"]).split("#");
 				if (isPropertie("mode") && _queue.length > 0)
 				{
 					var qmode:int = getPropertie("mode");
-					
+
 					if (qmode & 1)		// ne pas réjouer qcm's déjà joués
 					{
 						removePlayedFromQueue();
 					}
-					
+
 					if (qmode & 2)		// mode aléatoire
 					{
 						var n:int = _queue.length;
 						if (n > 1)
 							_queue = [_queue[Math.ceil(Math.random() * n - 1)]];
 					}
-					
-					/*switch (qmode)
-					{
-						case 1 :
-						{
-							removePlayedFromQueue();
-							break;
-						}
-						case 2 : // mode aléatoire choix un qcm dans la liste avec possiblité de rejouer qcm (sans gain de points)
-						{
-							removePlayedFromQueue();
-							_queue = [_queue[Math.ceil(Math.random() * _queue.length - 1)]];
-							break;
-						}
-						case 3 : // mode aléatoire choix d'un qcm dans la liste des qcm non joués
-						{
-							_queue = [_queue[Math.ceil(Math.random() * _queue.length - 1)]];
-							break;
-						}
-					}*/
 				}
-			}
+			}	
 			
 			if (_queue.length > 0)
 			{
