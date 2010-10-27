@@ -29,6 +29,11 @@
 			<path-element>../../ui/src/</path-element>
 		</source-path>
 		
+		<!-- for src -->
+		<source-path append="true">
+			<path-element>../../minigames/lib/src/</path-element>
+		</source-path>
+		
 		
 	</compiler>
 	<!-- <link-report>link-report.xml</link-report> -->

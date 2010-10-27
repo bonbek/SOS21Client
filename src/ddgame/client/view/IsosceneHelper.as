@@ -108,12 +108,15 @@ package ddgame.client.view {
 			var ofs:Point = _isoScene.drawer.findPoint(new UPoint(0, Math.floor(datamapProxy.dimy * .5) , 0, datamapProxy.tilew, datamapProxy.tileh, datamapProxy.tiled));			
 			ofs.x = Math.abs(ofs.x) - datamapProxy.tilew * .5;
 			ofs.y = -(ofs.y);
+			ofs.x += datamapProxy.sceneOffsetX;
+			ofs.y += datamapProxy.sceneOffsetY;	
 			
 			with (_isoScene.sceneLayer)
 			{
 				upos.xFactor = datamapProxy.tilew;
 				upos.yFactor = datamapProxy.tileh;
 				upos.zFactor = datamapProxy.tiled;
+				
 				xoffset = ofs.x;
 				yoffset = ofs.y;
 			}

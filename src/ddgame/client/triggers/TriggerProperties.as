@@ -43,7 +43,7 @@ package ddgame.client.triggers {
 		//  CONSTRUCTOR
 		//--------------------------------------
 
-		public function TriggerProperties(id:int, triggerClassId:int, fireType:int, srefId:String)
+		public function TriggerProperties (id:int, triggerClassId:int, fireType:int, srefId:String)
 		{
 			_id = id;
 			refId = srefId;
@@ -64,6 +64,7 @@ package ddgame.client.triggers {
 		//  PRIVATE VARIABLES
 		//--------------------------------------
 		
+		public var title:String;
 		private var _id:int;
 		protected var _triggerClassId:int;
 		protected var _target:Object;
@@ -163,11 +164,11 @@ package ddgame.client.triggers {
 		 *	du trigger au quel est lié symboliquement
 		 *	cette instance
 		 */
-		public function get linkageId():int
+		public function get linkageId () : int
 		{
 			return _linkageId;
 		}
-		
+
 		/**
 		 *	Définit l'identifiant des propriétées
 		 *	du trigger au quel est lié symboliquement
@@ -180,14 +181,18 @@ package ddgame.client.triggers {
 		}
 		
 		/**
-		 *	Retourne le type de persistance
-		 *	null si pas de persistance
+		 *	Flag persistance
 		 */
-		public function get persist():int
-		{
-			return _arguments["persist"];
-		}
+		public function get persist () : Boolean
+		{ return _arguments["persist"]; }
 		
+		public function set persist (val:Boolean) : void
+		{
+			if (val) _arguments["persist"] = true;
+		 	else
+				delete _arguments["persist"];
+		}
+
 		/**
 		 *	Définit l'identifiant de la classe de trigger
 		 *	associé à cette instance
@@ -195,7 +200,7 @@ package ddgame.client.triggers {
 		public function set triggerClassId (val:int) : void
 		{
 			_triggerClassId = val;
-		}	
+		}
 		
 		/**
 		 *	Retourne l'identifiant de la classe de trigger
@@ -287,7 +292,7 @@ package ddgame.client.triggers {
 			return isc;
 		}
 		
-		public function get chainedTo():Array
+		public function get chainedTo () : Array
 		{
 			var li:Array = triggersProxy.allTriggersInMap;
 			var n:int = li.length;
@@ -312,7 +317,7 @@ package ddgame.client.triggers {
 		 * chaînage ou pas
 		 * 
 		 */
-		public function get hasChainedTrigger():Boolean
+		public function get hasChainedTrigger () : Boolean
 		{
 			var a:Array = _arguments["onComplete"];
 			if (!a) {

@@ -31,7 +31,7 @@ package ddgame.client.commands {
 		public function execute (event:Event) : void
 		{
 			var o:Object = BaseEvent(event).content;
-			// TODO cleané "à la main"
+			// TODO cleané "à la main" ?
 			sendEvent(new Event(EventList.CLEAR_MAP));
 			
 			// nettoyage
@@ -49,7 +49,7 @@ package ddgame.client.commands {
 			}
 			
 			// WIP TEST cookie
-			trace(this, '------- TEST COOKIE ---------');
+			/*trace(this, '------- TEST COOKIE ---------');
 			var cookie:Object = PlayerProxy(facade.getProxy(PlayerProxy.NAME)).cookie;
 			if (cookie.data.hasOwnProperty("triggers"))
 			{
@@ -70,7 +70,7 @@ package ddgame.client.commands {
 						trace(p, b[p]);
 				}				
 			}
-			trace(this, '------------------------------');
+			trace(this, '------------------------------');*/
 			
 //			sendPublicEvent(new BaseEvent(PublicServerEventList.GET_MAPLIST));
 			sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATAMAP, o));

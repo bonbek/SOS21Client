@@ -253,7 +253,10 @@ package ddgame.client.proxy {
 			
 			if ("dis" in o)
 				triggerProps.disable = o.dis;
-			
+				
+			if ("title" in o)
+				triggerProps.title = o.title;
+
 			if (triggerProps.fireEventType)
 			{
 				// un trigger est déjà enregistré pour cette source
@@ -368,7 +371,7 @@ package ddgame.client.proxy {
 			// annulation des triggers en cours  d'execution
 			for (var t:Object in tileTriggerInstances)
 			{
-				t.cancel();
+				if (!t.properties.persist) t.cancel();
 			}
 			
 			TriggerProperties.list = new Dictionary(true);
