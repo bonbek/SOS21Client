@@ -131,6 +131,44 @@ package ddgame.client.triggers {
 		{ _properties.arguments[prop] = val; }
 		
 		/**
+		 *	@param event Event
+		 */
+		public function execute (event:Event = null) : void
+		{ trace(".execute() should be implemented in your subClass@" + toString()); }
+	
+		/**
+		 *	@private
+		 */
+		public function initialize () : void
+		{
+			// TODO, passer ça dans AbstractExternalTrigger
+			var evtType:String = properties.fireType == -1 ? "chained" : properties.fireEventType;
+			if (evtType != null)
+			{
+				var tevent:TriggerEvent = new TriggerEvent(evtType, this, true, true);
+				sendEvent(tevent);
+				if (tevent.isDefaultPrevented())
+				{
+					cancel();
+					return;
+				}
+			}
+			else
+			{
+				// TODO eventType est null ou non existant, on envoi une erreur / notifiation ?
+				cancel();
+			}
+		
+			if (!_differer)
+			{
+				// on regarde si il faut attendre que le joueur soit déplacé
+				if (!waitPlayerMove()) _execute();
+			} else {
+				onDiffer();
+			}
+		}
+	
+		/**
 		 *	Annule l'execution du trigger
 		 */
 		public function cancel () : void
@@ -177,39 +215,6 @@ package ddgame.client.triggers {
 		//--------------------------------------
 		//  EVENT HANDLERS
 		//--------------------------------------
-		
-		public function execute (event:Event = null) : void
-		{ trace(".execute() should be implemented in your subClass@" + toString()); }
-		
-		public function initialize () : void
-		{
-			// TODO, passer ça dans AbstractExternalTrigger
-			var evtType:String = properties.fireType == -1 ? "chained" : properties.fireEventType;
-			if (evtType != null)
-			{
-				var tevent:TriggerEvent = new TriggerEvent(evtType, this, true, true);
-				sendEvent(tevent);
-				if (tevent.isDefaultPrevented())
-				{
-					cancel();
-					return;
-				}
-			}
-			else
-			{
-				// TODO eventType est null ou non existant, on envoi une erreur / notifiation ?
-				cancel();
-			}
-			
-			if (!_differer)
-			{
-				// on regarde si il faut attendre que le joueur soit déplacé
-				if (!waitPlayerMove()) _execute();
-			} else {
-				onDiffer();
-			}
-			
-		}
 		
 		/**
 		 *	@param e Event
@@ -284,7 +289,7 @@ package ddgame.client.triggers {
 			sendEvent(new TriggerEvent(TriggerEvent.COMPLETE, this));
 		}
 		
-		protected function onDiffer():void
+		protected function onDiffer () : void
 		{
 			trace(".onDiffer() should be implemented in your subClass@" + toString());
 		}

@@ -123,6 +123,14 @@ package ddgame.client.proxy {
 			return _data.tileh;
 		}
 		
+		public function get sceneOffsetX () : Number {
+			return ("sceneOffsetX" in _data) ? _data.sceneOffsetX : 0;
+		}
+		
+		public function get sceneOffsetY () : Number {
+			return ("sceneOffsetY" in _data) ? _data.sceneOffsetY : 0;
+		}
+		
 		public function get avatarFactor():Number {
 			return _data.avatarFactor;
 		}
@@ -132,6 +140,10 @@ package ddgame.client.proxy {
 				return _data.enableNoMouseEventInAlpha;
 			
 			return true;
+		}
+		
+		public function get location () : Object {
+			return ("location" in _data) ? _data.location : {adress:"",lat:0,lon:0};
 		}
 		
 		public function set data (value:Object):void {

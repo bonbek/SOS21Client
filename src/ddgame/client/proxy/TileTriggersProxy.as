@@ -253,7 +253,10 @@ package ddgame.client.proxy {
 			
 			if ("dis" in o)
 				triggerProps.disable = o.dis;
-			
+				
+			if ("title" in o)
+				triggerProps.title = o.title;
+
 			if (triggerProps.fireEventType)
 			{
 				// un trigger est déjà enregistré pour cette source
@@ -323,7 +326,7 @@ package ddgame.client.proxy {
 		 *	@param tid int
 		 *	@return Boolean
 		 */
-		public function removeTrigger(tid:int):void
+		public function removeTrigger (tid:int) : void
 		{
 			var toRem:Boolean = true;
 			var li:Array = allTriggersInMap;
@@ -368,7 +371,7 @@ package ddgame.client.proxy {
 			// annulation des triggers en cours  d'execution
 			for (var t:Object in tileTriggerInstances)
 			{
-				t.cancel();
+				if (!t.properties.persist) t.cancel();
 			}
 			
 			TriggerProperties.list = new Dictionary(true);
@@ -414,7 +417,7 @@ package ddgame.client.proxy {
 		 *	@param fireEvtType String
 		 *	@return Boolean
 		 */
-		public function isActiveTileTrigger (tile:AbstractTile, fireEvtType:String) : Boolean
+		public function isActiveTileTrigger (tile:*, fireEvtType:String) : Boolean
 		{
 			for (var tr:Object in tileTriggerInstances)
 			{
@@ -477,9 +480,13 @@ package ddgame.client.proxy {
 		 *	@param tile AbstractTile
 		 *	@return Boolean
 		 */
-		public function hasTrigger (tile:AbstractTile) : Boolean
+		public function hasTrigger (tile:*) : Boolean
 		{
-			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
+//			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
+			if ("inGroup" in tile) {
+				if (tile.inGroup)
+					tile = AbstractTile(tile.inGroup.owner);
+			}
 			
 			var li:Array = allTriggersInMap;
 			var tid:String = tile.ID;
@@ -498,9 +505,13 @@ package ddgame.client.proxy {
 		 *	@param tile AbstractTile
 		 *	@return Boolean
 		 */
-		public function hasValidTrigger (tile:AbstractTile) : Boolean
+		public function hasValidTrigger (tile:*) : Boolean
 		{
-			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
+//			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
+			if ("inGroup" in tile) {
+				if (tile.inGroup)
+					tile = AbstractTile(tile.inGroup.owner);
+			}
 			
 			var li:Array = allTriggersInMap;
 			var tid:String = tile.ID;

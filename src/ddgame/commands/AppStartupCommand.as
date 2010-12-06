@@ -61,8 +61,8 @@ package ddgame.commands {
 			
 //			trace(this, "entryMap: ", entryMap);
 			// passage référence cookie au Proxy trigger
-			playerProxy.cookie.clear();
-			TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)).cookie = playerProxy.cookie;
+			//playerProxy.cookie.clear();
+			//TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)).cookie = playerProxy.cookie;
 			
 			sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATAMAP, {mapId:entryMap}));
 			

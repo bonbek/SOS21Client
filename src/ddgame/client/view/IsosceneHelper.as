@@ -108,12 +108,15 @@ package ddgame.client.view {
 			var ofs:Point = _isoScene.drawer.findPoint(new UPoint(0, Math.floor(datamapProxy.dimy * .5) , 0, datamapProxy.tilew, datamapProxy.tileh, datamapProxy.tiled));			
 			ofs.x = Math.abs(ofs.x) - datamapProxy.tilew * .5;
 			ofs.y = -(ofs.y);
+			ofs.x += datamapProxy.sceneOffsetX;
+			ofs.y += datamapProxy.sceneOffsetY;	
 			
 			with (_isoScene.sceneLayer)
 			{
 				upos.xFactor = datamapProxy.tilew;
 				upos.yFactor = datamapProxy.tileh;
 				upos.zFactor = datamapProxy.tiled;
+				
 				xoffset = ofs.x;
 				yoffset = ofs.y;
 			}
@@ -168,7 +171,7 @@ package ddgame.client.view {
 			_isoScene.addEventListener(MouseEvent.MOUSE_UP, sceneMouseHandler);*/
 			addListeners();
 			
-			unfreezeScene();
+//			unfreezeScene();
 			
 			sendEvent(new Event(PublicIsoworldEventList.ISOSCENE_BUILDED));
 			sendPublicEvent(new Event(PublicIsoworldEventList.ISOSCENE_BUILDED));
@@ -229,14 +232,14 @@ package ddgame.client.view {
 		
 		public function freezeScene():void
 		{
-//			trace("FREEZE_SCENE @" + toString());
+//			trace("FREEZE_SCENE @", this);
 			_isoScene.mouseEnabled = false;
 			_isoScene.mouseChildren = false;
 		}
 		
 		public function unfreezeScene():void
 		{
-//			trace("UNFREEZE_SCENE @" + toString());
+//			trace("UNFREEZE_SCENE @", this);
 			_isoScene.mouseEnabled = true;
 			_isoScene.mouseChildren = true;
 		}
@@ -280,7 +283,7 @@ package ddgame.client.view {
 		 */
 		private function sceneMouseHandler(event:MouseEvent):void
 		{
-			if (event.isDefaultPrevented()) return;
+			if (event.isDefaultPrevented() || !_isoScene.mouseEnabled) return;
 			
 			// on recup le type d'évênement
 			var evtype:String = event.type;
@@ -294,7 +297,7 @@ package ddgame.client.view {
 				
 				// -- Roll over - out --
 				
-				if (event.type == MouseEvent.MOUSE_OUT)
+				if (event.type == MouseEvent.MOUSE_OUT || event.type == MouseEvent.CLICK)
 					tile.filters = [];
 				
 				if (!tile.inGroup && !tile.group)
@@ -340,7 +343,7 @@ package ddgame.client.view {
 			if (evtype == MouseEvent.CLICK)
 			{
 				// la scene est freezée
-				if (!_isoScene.mouseChildren) return;
+//				if (!_isoScene.mouseChildren) return;
 
 				var p:Point = _isoScene.sceneLayer.findGridPoint(new Point (component.stage.mouseX, component.stage.mouseY));
 				var up:UPoint = new UPoint(p.x, p.y, 0);
