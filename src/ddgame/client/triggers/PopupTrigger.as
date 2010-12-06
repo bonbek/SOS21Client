@@ -177,7 +177,8 @@ package ddgame.client.triggers {
 			
 			// patch pour annulation ouverture de la popup
 			// depuis le swf loadé
-			if (_content.canceled) {
+			if (_content.canceled)
+			{
 				complete();
 				return;
 			}

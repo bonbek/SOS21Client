@@ -50,7 +50,8 @@ package ddgame.client.triggers {
 							ddgame.client.triggers.MiniGameTrigger,
 							ddgame.client.triggers.VimeoPlayerTrigger,
 							ddgame.client.triggers.AddBonusTrigger,
-							ddgame.client.triggers.ReachTrigger
+							ddgame.client.triggers.ReachTrigger,
+							ddgame.client.triggers.TileActionTrigger
 							/*ddgame.client.triggers.ScriptTrigger*/
 						]
 		}

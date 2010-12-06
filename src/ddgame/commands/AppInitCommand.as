@@ -16,8 +16,9 @@ package ddgame.commands {
 
 	import ddgame.events.EventList;
 
-	import ddgame.client.events.EventList;
+//	import ddgame.client.events.EventList; 
 	import ddgame.client.view.HelperList;
+	import ddgame.commands.OpenMapScreenCommand;
 
 	import ddgame.proxy.ProxyList;
 	import ddgame.proxy.UserProxy;
@@ -29,6 +30,7 @@ package ddgame.commands {
 	import ddgame.server.proxy.RemotingProxy;
 	import ddgame.server.events.ServerEventList;
 	import ddgame.server.events.PublicServerEventList;
+	import ddgame.client.view.MapScreenHelper;
 	
 	/**
 	 *	Commande initialisation de l'appli, effectue
@@ -69,6 +71,9 @@ package ddgame.commands {
 			
 			// initialiation helper audio
 			facade.registerObserver(AudioHelper.NAME, new AudioHelper());
+			// init helper carte déplacement
+			facade.registerObserver(MapScreenHelper.NAME, new MapScreenHelper());
+			facade.registerCommand(EventList.OPEN_MAPSCREEN, OpenMapScreenCommand);
 			
 			// TODO KK
 			var pr:ProgressLogoHelper = new ProgressLogoHelper();

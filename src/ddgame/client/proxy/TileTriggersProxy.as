@@ -326,7 +326,7 @@ package ddgame.client.proxy {
 		 *	@param tid int
 		 *	@return Boolean
 		 */
-		public function removeTrigger(tid:int):void
+		public function removeTrigger (tid:int) : void
 		{
 			var toRem:Boolean = true;
 			var li:Array = allTriggersInMap;
@@ -417,7 +417,7 @@ package ddgame.client.proxy {
 		 *	@param fireEvtType String
 		 *	@return Boolean
 		 */
-		public function isActiveTileTrigger (tile:AbstractTile, fireEvtType:String) : Boolean
+		public function isActiveTileTrigger (tile:*, fireEvtType:String) : Boolean
 		{
 			for (var tr:Object in tileTriggerInstances)
 			{
@@ -480,9 +480,13 @@ package ddgame.client.proxy {
 		 *	@param tile AbstractTile
 		 *	@return Boolean
 		 */
-		public function hasTrigger (tile:AbstractTile) : Boolean
+		public function hasTrigger (tile:*) : Boolean
 		{
-			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
+//			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
+			if ("inGroup" in tile) {
+				if (tile.inGroup)
+					tile = AbstractTile(tile.inGroup.owner);
+			}
 			
 			var li:Array = allTriggersInMap;
 			var tid:String = tile.ID;
@@ -501,9 +505,13 @@ package ddgame.client.proxy {
 		 *	@param tile AbstractTile
 		 *	@return Boolean
 		 */
-		public function hasValidTrigger (tile:AbstractTile) : Boolean
+		public function hasValidTrigger (tile:*) : Boolean
 		{
-			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
+//			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
+			if ("inGroup" in tile) {
+				if (tile.inGroup)
+					tile = AbstractTile(tile.inGroup.owner);
+			}
 			
 			var li:Array = allTriggersInMap;
 			var tid:String = tile.ID;

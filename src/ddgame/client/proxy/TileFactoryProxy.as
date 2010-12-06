@@ -172,6 +172,8 @@ package ddgame.client.proxy {
 					t.upos.height = o.height;
 					t.upos.depth = o.depth;
 					t.name = o.title;
+					// tile caché
+					if (o.hi) t.visible = false;
 //					tp = new TileProxy(o, t);
 //					if (!registerTile(tp))
 //						sendEvent(new BaseEvent(EventList.TILEFACTORY_PARSE_ERROR, tp.tile));

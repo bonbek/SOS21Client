@@ -59,8 +59,12 @@ package ddgame.client.triggers {
 		// jeu
 		private var _game:IMiniGame;
 		// options de chargement
-		private var loadOpts:Object = {preventCache:true, context:new LoaderContext(false, ApplicationDomain.currentDomain)};
-		private var loadBinOpts:Object = {preventCache:true, context:new LoaderContext(false, ApplicationDomain.currentDomain), type:BulkLoader.TYPE_BINARY};		
+//		private var loadOpts:Object = {preventCache:true, context:new LoaderContext(false, ApplicationDomain.currentDomain)};
+//		private var loadBinOpts:Object = {preventCache:true, context:new LoaderContext(false, ApplicationDomain.currentDomain), type:BulkLoader.TYPE_BINARY};		
+
+		private var loadOpts:Object = {preventCache:true};
+		private var loadBinOpts:Object = {preventCache:true, type:BulkLoader.TYPE_BINARY};		
+
 		
 		//--------------------------------------
 		//  GETTER/SETTERS
@@ -288,9 +292,11 @@ package ddgame.client.triggers {
 				TweenMax.to(bgGame, 0.5, {alpha:0, ease:Back.easeInOut, onComplete:stage.removeChild, onCompleteParams:[bgGame]});
 				bgGame = null;
 			}
-			
 			isosceneHelper.unfreezeScene();
-			if (loader) loader.removeAll();
+			if (loader)
+			{
+				loader.clear();
+			}
 			
 			super.complete(e);
 		}

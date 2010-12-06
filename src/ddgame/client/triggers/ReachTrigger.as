@@ -224,14 +224,14 @@ package ddgame.client.triggers {
 				t = triggerProxy.findActiveTrigger(tid) as AbstractTrigger;
 				if (t) t.cancel();
 			}			
+
+			_release();
+			super.cancel();
 			
 			// lancement du trigger définit pour "le(s) action(s) n'ont pas été(s) effectuées"
 			var tid:int = getPropertie("fail");
 			if (tid)
 				triggerProxy.launchTriggerByID(tid);
-
-			_release();
-			super.cancel();
 		}
 		
 		/**

@@ -50,7 +50,7 @@ package ddgame.client.commands {
 			facade.registerCommand(EventList.PLAYSTOP_SOUND, ddgame.client.commands.PlayStopSoundCommand);
 			facade.registerCommand(EventList.INJECT_TRIGGER, ddgame.client.commands.InjectTriggerCommand);
 			facade.registerCommand(EventList.INJECT_TRIGGERARGS, ddgame.client.commands.InjectTriggerArgsCommand);
-			
+						
 			// Register Proxys
 			facade.registerProxy(LibProxy.NAME, new LibProxy());
 			facade.registerProxy(TileFactoryProxy.NAME, new TileFactoryProxy());

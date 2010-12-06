@@ -8,6 +8,7 @@ package ddgame.server.proxy {
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
 	import org.as3yaml.YAML;
+//	import dupin.parsers.yaml.YAML;	
 	
 	import com.sos21.debug.log;
 	import com.sos21.proxy.AbstractProxy;
@@ -217,6 +218,7 @@ package ddgame.server.proxy {
 //					trace( o.tileList );
 //					trace( o.tileTriggers );
 					var yamlMap : Dictionary = YAML.decode(String(event.result)) as Dictionary;
+//					var yamlMap:Object = YAML.decode(String(event.result));
 					sendPublicEvent(new BaseEvent(PublicServerEventList.ON_DATAMAP, yamlMap));
 //					sendPublicEvent(new BaseEvent(PublicServerEventList.ON_DATAMAP, event.result));
 					break;

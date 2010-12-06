@@ -26,6 +26,9 @@ package ddgame.view {
 	import ddgame.vo.IBonus;
 	import ddgame.client.view.IsosceneHelper;
 
+	import gs.TweenMax;
+	import gs.easing.*;
+
 	/**
 	 *	Helper interface utilisateur
 	 *
@@ -77,6 +80,82 @@ package ddgame.view {
 			var tf:TextField = TextField(component.getChildByName("appVersionTextField"));
 			tf.text = ConfigProxy.getInstance().getContent("app_version");
 		}*/
+		
+		/**
+		 * Crée une fenêtre
+		 *	@param addToStage Boolean place qur stage
+		 *	@param center Boolean centre la fenêtre
+		 *	@return Object le fenêtre
+		 */
+		public function createWindow (addToStage:Boolean = true) : Object
+		{
+			var wdw:Object = component.createWindow();
+			if (addToStage) addWindow(wdw);
+
+			return wdw;
+		}
+		
+		/**
+		 * Supprime une fenêtre
+		 *	@param wdw Object
+		 */
+		public function removeWindow (wdw:Object) : void
+		{
+			var dob:DisplayObject = wdw as DisplayObject;
+			if (stage.contains(dob)) stage.removeChild(dob);
+		}
+		
+		/**
+		 * Affiche un fenêtre
+		 *	@param wdw Object
+		 *	@param center Boolean
+		 *	@param animate Boolean
+		 */
+		public function addWindow (wdw:Object, center:Boolean = true, animate:Boolean = true) : void
+		{
+			var dob:DisplayObject = wdw as DisplayObject;
+			if (center) centerWindow(wdw);
+			stage.addChild(dob);
+
+			if (animate)
+			{
+				var rand:int = Math.random() * 3;
+				var ofs:int = 40;
+				dob.alpha = 0;
+				switch (rand)
+				{
+					case 0 :
+						dob.x -= ofs;
+						TweenMax.to(dob, 0.4, {alpha:1, x:dob.x + ofs, ease:Back.easeOut});
+						break;
+					case 1 :
+						dob.y += ofs;
+						TweenMax.to(dob, 0.4, {alpha:1, y:dob.y - ofs, ease:Back.easeOut});
+						break;
+					case 2 :
+						dob.x += ofs;
+						TweenMax.to(dob, 0.4, {alpha:1, x:dob.x - ofs, ease:Back.easeOut});
+						break;
+					case 3 :
+						dob.y -= ofs;
+						TweenMax.to(dob, 0.4, {alpha:1, y:dob.y + ofs, ease:Back.easeOut});
+						break;
+				}
+			}
+		}
+		
+		/**
+		 * Centre une fenêtre ou un DisplayObject dans
+		 * la zone jeu
+		 *	@param wdw Object
+		 */
+		public function centerWindow (wdw:Object) : void
+		{
+			var w:int = wdw.width;
+			var h:int = wdw.height;
+			wdw.x = (VIEWPORT_AREA.width - w) / 2 + VIEWPORT_AREA.x;
+			wdw.y = (VIEWPORT_AREA.height - h) / 2 + VIEWPORT_AREA.y;
+		}
 		
 		/**
 		 *	Rafraîchit l'affichage du nom d'utilisateur
@@ -159,6 +238,11 @@ package ddgame.view {
 					e.data = dt;
 					break;
 				}
+				case component.compassButton :
+				{
+					e.data = "changer de région";
+					break;
+				}
 				case component.parametersButton :
 				{
 					e.data = component.helpScreen ? "fermer l'aide" : "afficher l'aide";
@@ -180,9 +264,7 @@ package ddgame.view {
 			switch (btn)
 			{
 				case component.compassButton :
-					trace(this, "compassButton ", e.type);
-//					sendEvent(new BaseEvent("addBonus", {theme:2, bonus:10}));
-//					sendEvent(new BaseEvent("addBonus", {theme:3, bonus:10}));
+					sendEvent(new BaseEvent(EventList.OPEN_MAPSCREEN));
 					break;					
 				case component.soundButton :
 					if (btn.selected) audioHelper.muteMusic();
