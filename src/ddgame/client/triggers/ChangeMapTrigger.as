@@ -139,10 +139,18 @@ package ddgame.client.triggers {
 		 */
 		private function popTransportClicked (item:Object) : void
 		{
-			// TODO check si joueur à assez de points
-			uiHelper.removeWindow(popup);
-			transport = item.data;
-			transportChoosed();
+			// check si joueur à assez de points
+			var playerEco:int = playerProxy.getBonus(3).gain;
+			if (playerEco - item.data.ecost < 0)
+			{
+				
+			}
+			else
+			{
+				uiHelper.removeWindow(popup);
+				transport = item.data;
+				transportChoosed();				
+			}
 		}
 		
 		/**
@@ -208,7 +216,6 @@ package ddgame.client.triggers {
 		{
 			if (state == "info")
 			{
-				/*release();*/
 				complete();
 			}
 			else
@@ -291,16 +298,16 @@ package ddgame.client.triggers {
 					popup = uiHelper.createWindow(false);
 					popup.closeButton = true;
 					popup.onClose.addOnce(onPopupClosed);
-					popup.title = 'Se rendre à\n<font size="13">' + destination.title + '</font>';					
+					popup.title = 'Se rendre à\n<font size="13">' + destination.title + '</font>';				
 					var list:ButtonList = new ButtonList();
 					var btn:TButton;
 					for each (var dt:Object in trans)
 					{
-						
+						// check si points eco suffisants
 						if (playerEco - dt.ecost < 0)
 						{
-							btn = new TButton(dt.title, dt, 0xFF0000);
-							btn.enabled = false;
+							btn = new TButton(dt.title, dt, 0xFF0000, "tu n'as pas assez de points éco !");
+///							btn.enabled = false;
 							list.addButton(btn);
 						}
 						else
@@ -333,6 +340,27 @@ package ddgame.client.triggers {
 		 */
 		private function transportChoosed () : void
 		{
+			// check si joueur à assez de points
+			var playerEco:int = playerProxy.getBonus(3).gain;
+			if (transport)
+			{
+//				5 - 20 = -15;
+				var diff:int = playerEco - transport.ecost;
+				if (diff < 0)
+				{
+					popup = uiHelper.createWindow(false);
+//					var tit:String = 'Tu ne peux te rendre à \n<font size="13">' + destination.title + '</font>\n';
+					var tit:String = "Domage !\n\n"
+					popup.title = tit;
+					var infoTxt:String = "<FONT size=\"16\">Tu ne peux te rendre à " + destination.title + ", il te manque <FONT color=\"#F7BC00\"><b>" + Math.abs(diff) + " points éco.</b></FONT></FONT>";
+					popup.addChild(new InfoText(infoTxt, 340));
+					popup.closeButton = true;
+					popup.onClose.addOnce(onPopupClosed);
+					uiHelper.addWindow(popup);
+					return;
+				}				
+			}
+
 			goToMap();
 		}
 		
@@ -611,6 +639,9 @@ internal class DButton extends SButton {
 
 import flash.display.Bitmap;
 import flash.text.*;
+import flash.events.MouseEvent;
+import gs.TweenMax;
+import gs.easing.*;
 
 /**
  * Boutton choix transport
@@ -644,7 +675,7 @@ internal class TButton extends DButton {
 	// CONSTRUCTOR
 	//---------------------------------------
 	
-	public function TButton (label:String, data:Object, costColor:uint = 0xF7BC00)
+	public function TButton (label:String, data:Object, costColor:uint = 0xF7BC00, toolTip:String = null)
 	{
 		_costColor = costColor;
 		super(label, data);
@@ -655,12 +686,20 @@ internal class TButton extends DButton {
 		var cost:int = data.ecost;
 		if (cost != 0)
 			this.costLabel = cost + " éco";
+		
+		if (toolTip)
+		{
+			_toolTipText = toolTip;
+			addEventListener(MouseEvent.CLICK, handleMouse, false, 0, true);
+		}
 	}
 	
 	//---------------------------------------
 	// PRIVATE & PROTECTED INSTANCE VARIABLES
 	//---------------------------------------
 	
+	protected var _toolTipText:String;
+	protected var _toolTip:TButtonTooltip;
 	protected var _costColor:uint;
 	protected var _costLabel:TextField;
 	private static var clStyle:Object = {direction:"horizontal", horizontalAlign:"right", paddingLeft:100, paddingRight:10};
@@ -673,6 +712,41 @@ internal class TButton extends DButton {
 	{ 
 		_costLabel.text = val;
 		invalidateSize();
+	}
+	
+	//---------------------------------------
+	// EVENT HANDLERS
+	//---------------------------------------
+	
+	/**
+	 * @inheritDoc
+	 */
+	override protected function handleMouse (event:MouseEvent) : void
+	{
+		super.handleMouse(event);
+		if (!_toolTipText) return;
+		
+		switch (event.type)
+		{
+			case MouseEvent.CLICK :
+				if (!_toolTip)
+				{
+					_toolTip = new TButtonTooltip(_toolTipText);
+					var bds:Object = getBounds(stage);
+					_toolTip.x = bds.right - 10;
+					_toolTip.y = bds.top + 10;
+					stage.addChild(_toolTip);
+					TweenMax.from(_toolTip, 0.3, {width:0, height:0, ease:Back.easeOut});
+				}
+				break;
+			case MouseEvent.MOUSE_OUT :
+				if (_toolTip)
+				{
+					stage.removeChild(_toolTip);
+					_toolTip = null;
+				}
+				break;
+		}
 	}
 	
 	//---------------------------------------
@@ -709,5 +783,61 @@ internal class TButton extends DButton {
 		cont.addChild(_costLabel);
 		addChild(cont);
 	}
+	
+}
+
+import flash.display.Sprite;
+import flash.text.*;
+import flash.filters.DropShadowFilter;
+
+internal class TButtonTooltip extends Sprite {
+	
+	public static var fx:DropShadowFilter = new DropShadowFilter();
+	
+	//---------------------------------------
+	// CONSTRUCTOR
+	//---------------------------------------
+	
+	public function TButtonTooltip (text:String) : void
+	{
+		super();
+		
+		var w:int = 160;
+		
+		var tf:TextFormat = new TextFormat();
+		tf.font = "MgUIFont";
+		tf.align = "center";
+		tf.size = 14;
+		
+		var tfd:TextField = new TextField();
+		tfd.defaultTextFormat = tf;
+		tfd.embedFonts = true;
+		tfd.autoSize = "left";
+		tfd.multiline = true;
+		tfd.wordWrap = true;
+		tfd.width = w - 20;
+		tfd.text = text;
+
+		// > ombre et fond
+		var dw:int = tfd.height / 2;
+		
+		graphics.clear();
+		graphics.beginFill(0xFFFFFF, 1);
+		graphics.drawRoundRect(0, -(tfd.height + 20), w, tfd.height + 20, 20);
+		graphics.endFill();
+		graphics.beginFill(0xFFFFFF, 1);
+		graphics.moveTo(0, 0);
+		graphics.lineTo(0, -20);
+		graphics.lineTo(20, 0);
+		graphics.endFill();
+		
+		tfd.x = 10;
+		tfd.y = -(tfd.height + 10);
+		addChild(tfd);
+		
+		filters = [fx];
+	}
+	
+	public var includeInLayout:Boolean = false;
 	
 }

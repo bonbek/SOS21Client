@@ -81,8 +81,7 @@ package ddgame.client.triggers {
 		//--------------------------------------
 		//  GETTER/SETTERS
 		//--------------------------------------
-		
-		public var title:String;
+
 		public var exec:int = 0;			// nombre de fois que le trigger à été exécuté
 		
 		public var symbLinkId:int = -1;	// lien symbolique à un autre trigger -1 = pas de lien
