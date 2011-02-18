@@ -237,14 +237,14 @@ package ddgame.client.view {
 		/**
 		 *	Déplace le pnj jusqu'au coordonnée
 		 */
-		public function moveTo(dx:int, dy:int, dz:int, callBack:Function = null) : Boolean
+		public function moveTo (dx:int, dy:int, dz:int, callBack:Function = null) : Boolean
 		{
 			var cP:CollisionGridProxy = CollisionGridProxy(facade.getProxy(CollisionGridProxy.NAME));
 			var cellTarget:UPoint = new UPoint(dx, dy, dz);
 			var path:Array = cP.findPath(component.upos, cellTarget);
 			if(path.length > 1)
 			{
-				component.pathTo(path);
+				component.pathTo (path);
 				if (callBack) {
 					component.addEventListener(TileEvent.MOVE_COMPLETE, callBack);
 				}
@@ -260,13 +260,13 @@ package ddgame.client.view {
 		 *	@param	duration	 durée d'affichage du ballon en millisecondes
 		 */
 		public function displayThink(	text:String, duration:int = 10000, stopAutoLife:Boolean = false,
-												autoClose:Boolean = false, bwidth:int = 200	):MovieClip
+												autoClose:Boolean = false, bwidth:int = 200	) : MovieClip
 		{
 			// on supprime si un ballon déjà affiché
 			removeBallon();
 			// on crée le nouveau ballon
-			createBallon("BallonThinkPopup", duration, stopAutoLife, autoClose, bwidth).text = text;	
-			TweenLite.from(ballon, 1, {alpha:0});
+			createBallon("BallonThinkPopup", duration, stopAutoLife, autoClose, bwidth).text = "<body>" + text + "</body>";	
+			TweenLite.from(ballon, 0.5, {alpha:0});
 			return ballon;
 		}
 		
@@ -277,14 +277,15 @@ package ddgame.client.view {
 		 *	@param	duration	 la durée d'affichage du ballon 0 = infini
 		 */
 		public function displayTalk(	text:String, duration:int = 0, stopAutoLife:Boolean = false,
-												autoClose:Boolean = false, bwidth:int = 200	):MovieClip
+												autoClose:Boolean = false, bwidth:int = 200	) : MovieClip
 		{
 			// on supprime si un ballon déjà affiché
 			removeBallon();
 			// on crée le nouveau ballon
-			createBallon("BallonPopup", duration, stopAutoLife, autoClose, bwidth).text = text;
+			createBallon("BallonPopup", duration, stopAutoLife, autoClose, bwidth).text = "<body>" + text + "</body>";
 			ballon.removeChild(ballon.closeButton);
-			TweenLite.from(ballon, 1, {alpha:0});
+			TweenLite.from(ballon, 0.5, {alpha:0});
+
 			return ballon;
 		}
 		
@@ -296,7 +297,7 @@ package ddgame.client.view {
 		 */
 		public function createBallon(	skin:String, duration:int, stopAutoLife:Boolean, autoClose:Boolean, bwidth:int = 200 ):MovieClip
 		{
-			var classRef:Class = libProxy.getDefinitionFrom("lib/HtmlPopup.swf", skin);
+			var classRef:Class = libProxy.getDefinitionFrom(libProxy.libPath + "HtmlPopup.swf", skin);
 			ballon = new classRef();
 			stage.addChild(ballon);
 			ballon.width = bwidth;			
@@ -447,20 +448,26 @@ package ddgame.client.view {
 						var tArgs:Array;						
 						// event dispatché pendant la phase de "parsing" juste avant d'effectuer chaque action
 						var subEvt:BaseEvent;
-
 						var l1:int = tList.length;
 						if (l1 > 0)
 						{
-							for (var i:int = 0; i < l1; i++)
+						//	for (var i:int = 0; i < l1; i++)
+							// Patch autoClose, si un trigger est un ballon, le trigger était lancé puis fermé
+							// par le autoClose, du coup on parcours la liste à l'envers on tombe sur le autoClose
+							// en premier !! DONC il faut respecter le fait que le autoClose doit se trouver toujours
+							// à la fin du TextEvent...
+							while (--l1 > -1)
 							{
-								tArgs = tList[i].split(":");
+								tArgs = tList[l1].split(":");
 								switch (tArgs[0])
 								{
 									case "trigger" : // > on est sur le lancement d'un trigger
 									{
-										if (tArgs[1] == "slid")
+										var triggerId:int = tArgs[1] == "slid" ? tArgs[2] : tArgs[1];
+										if (triggerId)		
+//										if (tArgs[1] == "slid")
 										{ // on est sur un lien symbolique vers un trigger											
-											var triggerId:int = tArgs[2];
+//											var triggerId:int = tArgs[2];
 											// hook pour empêcher le lancement du trigger
 											subEvt = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:EventList.LAUNCH_TRIGGER, triggerId:triggerId});
 											sendEvent(subEvt);
@@ -492,6 +499,9 @@ package ddgame.client.view {
 											jumpInLife(nodeId);
 										break;
 									}
+									default :
+										sendEvent(new BaseEvent(EventList.LAUNCH_TRIGGER, {id:tArgs[0]}));
+										break;
 								}
 							}
 						}
@@ -683,10 +693,13 @@ package ddgame.client.view {
 					{
 						ballon.data.stopAutoLife = false;
 						removeBallon();
-					}					
+					}
 					autoLife = false;
-					_xmlTrip.stop();
-					_xmlTrip = null;
+					if (_xmlTrip)
+					{
+						_xmlTrip.stop();
+						_xmlTrip = null;				
+					}
 					_component = null;
 					facade.unregisterObserver(this.name);
 					break;
@@ -980,25 +993,31 @@ package ddgame.client.view {
 			ballonTimer = new Timer(0, 1);
 			// styleSheet du ballon
 			ballonStyleSheet = new StyleSheet();
-
+			
+			var body:Object = new Object();
+			body.fontFamily = "Verdana";
+			body.fontSize = "11";
+			
 			var hover:Object = new Object();
 			hover.fontWeight = "bold";
-			hover.color = "#00FF00";
+			hover.color = "#7F007F";
+//			hover.textDecoration= "underline";
 
 			var link:Object = new Object();
 			link.fontWeight = "bold";
-			link.textDecoration= "underline";
-			link.color = "#555555";
+//			link.textDecoration= "underline";
+			link.color = "#FF0092";
 
 			var active:Object = new Object();
 			active.fontWeight = "bold";
-			active.color = "#FF0000";
+			active.color = "#FF0092";
 
 			var visited:Object = new Object();
 			visited.fontWeight = "bold";
-			visited.color = "#cc0099";
-			visited.textDecoration= "underline";
+			visited.color = "#FF0092";
+//			visited.textDecoration= "underline";
 
+			ballonStyleSheet.setStyle("body", body);
 			ballonStyleSheet.setStyle("a:link", link);
 			ballonStyleSheet.setStyle("a:hover", hover);
 			ballonStyleSheet.setStyle("a:active", active);
