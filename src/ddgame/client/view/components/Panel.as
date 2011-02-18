@@ -46,7 +46,7 @@ package ddgame.client.view.components {
 		//  PRIVATE VARIABLES
 		//--------------------------------------
 		
-		[Embed(source="/ddgame/assets/Panel.swf", symbol="PanelAsset")]
+		[Embed(source="../../../../../assets/Panel.swf", symbol="PanelAsset")]
 		private var _skinAssetClass:Class;
 		
 		protected var _closeBtn:CrossButton;

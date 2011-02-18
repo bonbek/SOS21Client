@@ -13,7 +13,7 @@ package ddgame.client.view.components {
 	 *	@author toffer
 	 *	@since  15.04.2008
 	 */
-	[Embed(source="/ddgame/assets/Panel.swf", symbol="CrossButtonAsset")]
+	[Embed(source="../../../../../assets/Panel.swf", symbol="CrossButtonAsset")]
 	public class CrossButton extends SimpleButton {
 		
 		//--------------------------------------
