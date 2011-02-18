@@ -37,6 +37,8 @@
 		
 	</compiler>
 	<!-- <link-report>link-report.xml</link-report> -->
+	<target-player>10.0.0</target-player>
+	
 	<metadata>
 		<title>release Application</title>
 		<description>release Project</description>
