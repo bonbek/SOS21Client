@@ -11,6 +11,7 @@ package ddgame.client.proxy {
 	import com.sos21.tileengine.structures.UPoint;
 	import com.sos21.tileengine.core.AbstractTile;
 	import com.sos21.tileengine.display.*;
+	import ddgame.client.view.PNJHelper;
 
 	import ddgame.client.events.EventList;
 	import ddgame.client.proxy.*;
@@ -164,7 +165,9 @@ package ddgame.client.proxy {
 					}
 					
 					t = new AbstractTile (String(o.id),new UPoint(o.pos.x, o.pos.y, o.pos.z, tileDims.xFactor, tileDims.yFactor, tileDims.zFactor), tv);
+					t.data = o;
 					t.rotation = o.pos.r;
+					
 					// patch pnj
 					t.gotoAndStop("stand");
 					t.setFrame(o.pos.f);
@@ -172,6 +175,10 @@ package ddgame.client.proxy {
 					t.upos.height = o.height;
 					t.upos.depth = o.depth;
 					t.name = o.title;
+
+					/*if (o.pnj)
+						facade.registerObserver(t.name, new PNJHelper(t.name, t));*/
+					
 					// tile caché
 					if (o.hi) t.visible = false;
 //					tp = new TileProxy(o, t);
