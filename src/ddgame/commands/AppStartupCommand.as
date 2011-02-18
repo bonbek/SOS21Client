@@ -33,10 +33,12 @@ package ddgame.commands {
       public function execute (event:Event):void
 		{
 			// initialiation de la partie client (jeu)
-			facade.registerCommand(ddgame.client.events.EventList.ISOWORLD_INIT, ddgame.client.commands.IsoworldInitCommand);
-			sendEvent(new BaseEvent(ddgame.client.events.EventList.ISOWORLD_INIT));
+			facade.registerCommand(ddgame.client.events.EventList.ISOWORLD_INIT, ddgame.client.commands.IsoworldInitCommand, true);
+			sendPublicEvent(new BaseEvent(ddgame.client.events.EventList.ISOWORLD_INIT));
 			facade.unregisterCommand(ddgame.client.events.EventList.ISOWORLD_INIT);
 			
+			sendPublicEvent(new Event("appReady"));
+				
 			// on lance la chargement première scène
 			// > 1ére connection, le home du joueur, 2e et autre : dernière scène vistée
 			var playerProxy:PlayerProxy = PlayerProxy(facade.getProxy(ProxyList.PLAYER_PROXY));
@@ -63,6 +65,9 @@ package ddgame.commands {
 			// passage référence cookie au Proxy trigger
 			//playerProxy.cookie.clear();
 			//TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)).cookie = playerProxy.cookie;
+			
+			// chargement map 0 (triggers Globaux)
+			sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATAMAP, {mapId:0}));
 			
 			sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATAMAP, {mapId:entryMap}));
 			

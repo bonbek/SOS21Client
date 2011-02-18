@@ -38,7 +38,9 @@ package ddgame.client.commands {
 			// -> la scène affichée
 			IsosceneHelper(facade.getObserver(IsosceneHelper.NAME)).clearScene();
 			// -> les triggers
-			TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)).removeCurrentMapTriggers();
+			var trigProxy:TileTriggersProxy = TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME));
+			trigProxy.removeCurrentMapTriggers();
+			trigProxy.triggersEnabled = false;
 			
 			// -> patch injection de propriétées triggers
 			if (o.injectTP)

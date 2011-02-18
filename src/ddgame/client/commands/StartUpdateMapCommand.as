@@ -31,11 +31,12 @@ package ddgame.client.commands {
 			// objet data map
 			var o:Object = BaseEvent(event).content;
 			
-			trace(this, " Start update Lib");
+			trace("info", this, " Start update Lib");
 			// on prépare la librairie
 			var libProxy:LibProxy = LibProxy(facade.getProxy(LibProxy.NAME));
 			libProxy.clear();
 			
+			var dataMapProxy:DatamapProxy = DatamapProxy(facade.getProxy(DatamapProxy.NAME));
 			// ------> triggers externes
 			var triggerProxy:TileTriggersProxy = facade.getProxy(TileTriggersProxy.NAME) as TileTriggersProxy;
 			var trigLocator:TriggerLocator = TriggerLocator.getInstance();
@@ -63,14 +64,16 @@ package ddgame.client.commands {
 					{
 						toPLoad = dtrigger.arguments.pload;
 						n2 = toPLoad.length;
-						while (--n2 > -1)
+						while (--n2 > -1) {
 							libProxy.createLoader(toPLoad[n2]);
+						}
 					}
 					
 					ftrigger = triggerList.trigger.(@id == dtrigger.classId).@url;
 					if (o.externalTriggers.indexOf(dtrigger.classId) > -1)
 						continue;
-					if (ftrigger && !trigLocator.isRegisteredId(dtrigger.classId)) {
+					if (ftrigger && !trigLocator.isRegisteredId(dtrigger.classId))
+					{
 						// on place le trigger externe en chargement
 						libProxy.createLoader(ftrigger);					
 						// on stock son id ref dans le datamap
@@ -100,6 +103,16 @@ package ddgame.client.commands {
 				}
 			}
 			
+			// **** MAP 0 *****
+			if (o.id == 0)
+			{
+				dataMapProxy.data = o;
+				triggerProxy.parse(o.triggers);
+				dataMapProxy.data = null;
+				return;
+			}
+			
+			
 			// ------> assets
 			// liste des tiles
 			tlist = o.tileList;	// liste des datas tiles			
@@ -112,7 +125,7 @@ package ddgame.client.commands {
 				dtile = tlist[n];
 				if (dtile.pnj || dtile.sheet)
 				{
-					libProxy.createLoader("tiles60x30/" + dtile.assets[0]);
+					libProxy.createLoader(libProxy.tilesPath + dtile.assets[0]);
 				}
 				else
 				{
@@ -131,23 +144,22 @@ package ddgame.client.commands {
 			
 			
 			if(o.foregroundFile)
-				libProxy.createLoader(o.foregroundFile);
+				libProxy.createLoader(libProxy.layersPath + o.foregroundFile);
 			
 			if (o.backgroundFile)
-				libProxy.createLoader(o.backgroundFile, true);
+				libProxy.createLoader(libProxy.layersPath + o.backgroundFile, true);
 			
 			// TODO à charger une seule fois (premiere map ?)
-			libProxy.createLoader("sprites/AvatarSkins.swf");
-			libProxy.createLoader("sprites/moveMarker.swf");
-			libProxy.createLoader("uis/widgets.swf");
-			libProxy.createLoader("lib/HtmlPopup.swf");
+			libProxy.createLoader(libProxy.spritesPath + "AvatarSkins.swf");
+			libProxy.createLoader(libProxy.spritesPath + "moveMarker.swf");
+//			libProxy.createLoader("uis/widgets.swf");
+			libProxy.createLoader(libProxy.libPath + "HtmlPopup.swf");
 						
 			// on lance le chargement
 			libProxy.load();
 			trace(this, " end update Lib");
 			
 			// on passe les datas au DatamapProxy
-			var dataMapProxy:DatamapProxy = DatamapProxy(facade.getProxy(DatamapProxy.NAME));
 			dataMapProxy.data = o;
 		}
 				
