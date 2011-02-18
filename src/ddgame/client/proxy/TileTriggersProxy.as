@@ -6,7 +6,7 @@ package ddgame.client.proxy {
 	import flash.events.Event;
 	import flash.utils.Dictionary;
 	import flash.net.SharedObject;
-	import flash.utils.Timer;
+	import flash.utils.*;
 	
 	import com.sos21.events.BaseEvent;
 	import com.sos21.collection.HashMap;
@@ -16,6 +16,7 @@ package ddgame.client.proxy {
 	import ddgame.client.commands.*;
 	import ddgame.client.triggers.*;
 	import ddgame.client.proxy.*;
+	import ddgame.server.proxy.RemotingProxy;
 
 	/**
 	 *	Class description.
@@ -37,7 +38,7 @@ package ddgame.client.proxy {
 		//  CONSTRUCTOR
 		//--------------------------------------
 
-		public function TileTriggersProxy(sname:String = null, odata:Object = null)
+		public function TileTriggersProxy (sname:String = null, odata:Object = null)
 		{
 			super(sname == null ? NAME : sname, odata);
 		}
@@ -48,11 +49,17 @@ package ddgame.client.proxy {
 		
 		private var tileTriggerProps:Dictionary = new Dictionary(true);
 		private var triggerLocator:TriggerLocator = TriggerLocator.getInstance();
-		private var tileTriggerInstances:Dictionary = new Dictionary(true);
+		private var tileTriggerInstances:Array = [];
 		private var _triggersEnabled:Boolean = true;
 		
-		private var timer:Timer;
-		private var oninitMapTriggersProps:Array = [];		// triggers à lancer au chargement
+		// timer pour trigger basés sur temps
+		private var tick:Timer;
+		// temps écoulé depuis entrée dans une scène
+		private var lElapsedTime:int;
+		// triggers à lancer au chargement
+		private var oninitMapTriggersProps:Array = [];
+		// triggers de la map encours basés sur un lancement timer
+		private var tickMapTriggersProps:Array = [];
 		
 		// triggers en attente ciblé sur des maps
 		// > patch ajout de triggers via InjectTriggerCommand
@@ -71,6 +78,11 @@ package ddgame.client.proxy {
 		// PUBLIC VARIABLES
 		//---------------------------------------		
 		
+		// Pour debug
+		public var tickExec:int;
+		public var initMapExex:int;
+		public var hasValidExec:int;
+		
 		// trigger exécuté depuis la map en cours
 		public var executedTrigger:Array = [];
 		
@@ -87,8 +99,23 @@ package ddgame.client.proxy {
 		{
 			return DatamapProxy(facade.getProxy(DatamapProxy.NAME));
 		}
+
+		public function get remotingProxy () : RemotingProxy
+		{
+			return RemotingProxy(facade.getProxy(RemotingProxy.NAME));
+		}
 		
-		public function set triggersEnabled (val:Boolean) : void {
+		public function get envProxy () : EnvProxy
+		{
+			return EnvProxy(facade.getProxy(EnvProxy.NAME));
+		}
+		
+		public function set triggersEnabled (val:Boolean) : void
+		{
+			if (val) tick.start();
+			else
+			tick.stop();
+
 			_triggersEnabled = val;
 		}
 
@@ -96,14 +123,43 @@ package ddgame.client.proxy {
 			return _triggersEnabled;
 		}
 		
-		public function get allTriggersInMap() : Array
+		/**
+		 * Liste de tous les triggers, scène encours plus triggers
+		 * persistants
+		 */
+		public function get allTriggers () : Array
 		{
-			var ret:Array = [];
-			var li:Dictionary = TriggerProperties.list;
-			for each (var o:Object in li)
-				ret.push(o);
+			var list:Array = [];
+			for each (var o:Object in TriggerProperties.list)
+				list.push(o);
 				
-			return ret;
+			return list;
+		}
+		
+		/**
+		 * Liste des triggers de la scène en cours
+		 */
+		public function get currentMapTriggers () : Array
+		{
+			var list:Array = [];
+			for each (var o:Object in TriggerProperties.list) {
+				if (!o.persist) list.push(o);
+			}
+				
+			return list;			
+		}
+		
+		/**
+		 * Liste de tous les triggers persistants
+		 */
+		public function get persistantTriggers () : Array
+		{
+			var list:Array = [];
+			for each (var o:Object in TriggerProperties.list) {
+				if (o.persist) list.push(o);
+			}
+				
+			return list;
 		}
 		
 		//--------------------------------------
@@ -132,7 +188,7 @@ package ddgame.client.proxy {
 				}
 				catch (error:Error)
 				{
-					trace(error.toString() + " @" + toString());
+					trace("error", this, error.toString());
 				}
 				
 			}
@@ -149,7 +205,7 @@ package ddgame.client.proxy {
 			}
 				
 			
-			trace("-- tile triggers parsed @" + toString());
+			trace("info", this, "triggers parsed");
 		}
 		
 		public function getSpecMapTriggers (mapId:int):Array
@@ -182,7 +238,7 @@ package ddgame.client.proxy {
 		public function removeAllTriggers (tid:String) : void
 		{
 			var t:Object;
-			var li:Array = allTriggersInMap;
+			var li:Array = allTriggers;
 			var n:int = li.length;			
 			while (--n > -1)
 			{
@@ -243,20 +299,24 @@ package ddgame.client.proxy {
 			}
 				
 			// trigger valide si la map précedente est
-			if ("fromM" in o) {
+			if ("fromM" in o)
 				triggerProps.activeFromMaps = o.fromM;
-			}
 			
-			if (("cond" in o)) {
+			if ("cond" in o)
 				triggerProps.cond = o.cond;
-			}
 			
 			if ("dis" in o)
 				triggerProps.disable = o.dis;
 				
 			if ("title" in o)
 				triggerProps.title = o.title;
-
+			
+			if ("exec" in o)
+				triggerProps.fireCount = o.exec;
+				
+			if ("lev" in o)
+				triggerProps.level = o.lev;
+			
 			if (triggerProps.fireEventType)
 			{
 				// un trigger est déjà enregistré pour cette source
@@ -266,11 +326,20 @@ package ddgame.client.proxy {
 				}
 				else
 				{
-					// patch triggers à lancer à l'initialisation de la map
+					// patch triggers à lancer à l'initialisation de la map et triggers
+					// en continus
 					if (triggerProps.fireType == 8)
+					{
 						oninitMapTriggersProps.push(triggerProps);
+					}
+					else if (triggerProps.fireType == 9)
+					{
+						tickMapTriggersProps.push(triggerProps);
+					}
 					else
+					{
 						tileTriggerProps[triggerProps.fireEventType].insert(String(o.tileRefId), [triggerProps]);
+					}
 				}
 			}
 			
@@ -284,20 +353,44 @@ package ddgame.client.proxy {
 		 *	@param prop String	la propriété qui change
 		 * @param newVal			la nouvelle valeur de la propriété
 		 */
-		public function onTriggerPropertieChange(triggerProps:TriggerProperties, prop:String, newVal:*):void
+		public function onTriggerPropertieChange (triggerProps:TriggerProperties, prop:String, newVal:*) : void
 		{
 			switch (prop)
 			{
 				case "fireType" :
 				{
-					// mise à jour de la référence
 					var tid:String = triggerProps.refId;
-					var fevt:String = triggerProps.fireEventType;
-					if (fevt)
+					
+					if (triggerProps.fireType == 8)
 					{
-						var al:Array = tileTriggerProps[fevt].find(tid);
-						al.splice(al.indexOf(triggerProps), 1);
+						for each (var t:Object in oninitMapTriggersProps) {
+							if (t.id == triggerProps.id) {
+								oninitMapTriggersProps.splice(oninitMapTriggersProps.indexOf(triggerProps), 1);
+								break;
+							}
+						}
 					}
+					else if (triggerProps.fireType == 9)
+					{
+						for each (t in tickMapTriggersProps) {
+							if (t.id == triggerProps.id) {
+								tickMapTriggersProps.splice(tickMapTriggersProps.indexOf(triggerProps), 1);
+								break;
+							}
+						}
+					}
+					else
+					{
+						var fevt:String = triggerProps.fireEventType;
+						if (fevt)
+						{
+							var al:Array = tileTriggerProps[fevt].find(tid);
+							var ind:int = al.indexOf(triggerProps);
+							if (ind > -1) al.splice(ind, 1);
+						}						
+					}
+					
+					// mise à jour de la référence
 
 					fevt = TriggerProperties.fireTypeList[newVal];
 					if (fevt)
@@ -309,6 +402,8 @@ package ddgame.client.proxy {
 							// patch triggers à lancer à l'initialisation de la map
 							if (newVal == 8)
 								oninitMapTriggersProps.push(triggerProps);
+							else if (newVal == 9)
+								tickMapTriggersProps.push(triggerProps);
 							else
 								tileTriggerProps[fevt].insert(tid, [triggerProps]);
 						}
@@ -329,7 +424,7 @@ package ddgame.client.proxy {
 		public function removeTrigger (tid:int) : void
 		{
 			var toRem:Boolean = true;
-			var li:Array = allTriggersInMap;
+			var li:Array = allTriggers;
 			var n:int = li.length;
 			var tr:TriggerProperties;
 			var ind:int;
@@ -369,15 +464,26 @@ package ddgame.client.proxy {
 		public function removeCurrentMapTriggers():void
 		{
 			// annulation des triggers en cours  d'execution
-			for (var t:Object in tileTriggerInstances)
+			for each (var t:Object in tileTriggerInstances)
 			{
-				if (!t.properties.persist) t.cancel();
+				if (!t.properties.persist)
+				{
+					t.cancel();
+					_forgetTriggerInstance(t);
+				}
 			}
 			
-			TriggerProperties.list = new Dictionary(true);
+			// mise à z
+			for each (t in TriggerProperties.list)
+			{
+				if (!t.persist) delete TriggerProperties.list[t.id];
+			}
+			
+//			TriggerProperties.list = new Dictionary(true);
 			TriggerProperties.lastHighestId = 5000;
-			TriggerProperties.linkedTriggerList = new Array();			
-			tileTriggerInstances = new Dictionary(true);
+			TriggerProperties.linkedTriggerList = [];
+//			tileTriggerInstances = [];
+			tickMapTriggersProps = [];
 			var n:int = TriggerProperties.fireTypeList.length;
 			while (--n > -1)
 			{
@@ -398,7 +504,8 @@ package ddgame.client.proxy {
 		 */
 		public function findActiveTrigger (id:int) : ITrigger
 		{
-			for (var at:Object in tileTriggerInstances)
+//			for (var at:Object in tileTriggerInstances)
+			for each (var at:Object in tileTriggerInstances)
 				if (at.properties.id  == id) return at as ITrigger;
 			
 			return null;
@@ -419,7 +526,7 @@ package ddgame.client.proxy {
 		 */
 		public function isActiveTileTrigger (tile:*, fireEvtType:String) : Boolean
 		{
-			for (var tr:Object in tileTriggerInstances)
+			for each (var tr:Object in tileTriggerInstances)
 			{
 				if (tr.sourceTarget == tile)
 					if (tr.properties.fireEventType == fireEvtType) return true;
@@ -428,9 +535,18 @@ package ddgame.client.proxy {
 			return false;
 		}
 		
+		/**
+		 * Flag trigger est en instance d'execution
+		 *	@param t TriggerProperties
+		 *	@return Boolean
+		 */
 		public function isActiveTrigger (t:TriggerProperties) : Boolean
 		{
-			return tileTriggerInstances[t] != null;
+			for each (var tr:Object in tileTriggerInstances)
+				if (tr.properties == t) return true;
+
+			return false;
+//			return tileTriggerInstances.indexOf(t) != null;
 		}
 		
 		/**
@@ -441,10 +557,13 @@ package ddgame.client.proxy {
 		 */
 		public function isValidTrigger (t:*) : Boolean
 		{
-//			trace(t, "disable", t.disable);
 			if (!(t is TriggerProperties)) t = TriggerProperties.list[t];
 			if (!t) return false;
-			return t.fireCount < t.maxFireCount && isValidForCurrentMap(t) && !t.disable;
+			return	t.fireCount < t.maxFireCount
+						&& isValidForCurrentMap(t)
+						&& !t.disable
+						&& (!t.level || t.level == playerProxy.level)
+						&& envProxy.resolve(t.cond);
 		}
 		
 		/**
@@ -488,7 +607,7 @@ package ddgame.client.proxy {
 					tile = AbstractTile(tile.inGroup.owner);
 			}
 			
-			var li:Array = allTriggersInMap;
+			var li:Array = allTriggers;
 			var tid:String = tile.ID;
 			var n:int = li.length;
 			
@@ -507,28 +626,33 @@ package ddgame.client.proxy {
 		 */
 		public function hasValidTrigger (tile:*) : Boolean
 		{
+			var ti:int = getTimer();
 //			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
 			if ("inGroup" in tile) {
 				if (tile.inGroup)
 					tile = AbstractTile(tile.inGroup.owner);
 			}
 			
-			var li:Array = allTriggersInMap;
+			var li:Array = allTriggers;
 			var tid:String = tile.ID;
 			var n:int = li.length;
 			var t:TriggerProperties;
 			
+			var hs:Boolean = false;
 			while (--n > -1) {
 				t = li[n];
 				if (t.refId == tid) {
-					if (isValidTrigger(t)) return true;
+					if (isValidTrigger(t)) {
+						hs = true;
+						break;
+					}
 				}
 			}
-			
-			return false;
+			hasValidExec = getTimer() - ti;
+			return hs;
 		}
 		
-		public function hasTriggerId(id:String):Boolean
+		public function hasTriggerId (id:String) : Boolean
 		{
 			for each (var p:HashMap in tileTriggerProps)
 			{
@@ -561,8 +685,8 @@ package ddgame.client.proxy {
 		}*/
 		
 		
-		public function findTileByTrigger(trigger:ITrigger):AbstractTile
-		{ return tileTriggerInstances[trigger]; }
+		public function findTileByTrigger(trigger:ITrigger) : AbstractTile
+		{ return trigger.sourceTarget as AbstractTile; }
 		
 		
 		/**
@@ -571,11 +695,11 @@ package ddgame.client.proxy {
 		 *	@param id String identifiant de la source
 		 *	@return Array de TileTriggersProxy
 		 */
-		public function getAllTriggers(tid:String):Array
+		public function getAllTriggers (tid:String) : Array
 		{
 			var tList:Array = [];
 			var tp:Object;
-			var li:Array = allTriggersInMap;
+			var li:Array = allTriggers;
 			var n:int = li.length;
 			
 			while (--n > -1)
@@ -587,49 +711,56 @@ package ddgame.client.proxy {
 			return tList;
 		}
 		
-		public function getTrigger(trid:int):TriggerProperties
+		/**
+		 * Retourne un trigger depuis son id
+		 *	@param trid int
+		 *	@return TriggerProperties
+		 */
+		public function getTrigger (id:int) : TriggerProperties
 		{
-			return TriggerProperties.list[trid];
-		}
-		
-		public function launchTileTrigger(tile:AbstractTile, fireEvtType:String):void
-		{
-			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
-//			var triggerProps:TriggerProperties = tileTriggerProps[fireEvtType].find(tile.ID);
-//			launchTrigger(triggerProps, tile);
-			var atProps:Array = getTriggerList(tile.ID, fireEvtType);			
-			var n:int = atProps.length;
-			while(--n > -1)
-				launchTrigger(atProps[n], tile);
+			return TriggerProperties.list[id];
 		}
 		
 		/**
-		 *	Lance l'execution d'un trigger 
+		 * Lance les triggers associé à la source et au type d'event donné
+		 *	@param tile AbstractTile
+		 *	@param fireEvtType String
+		 */
+		public function launchTileTrigger (tile:AbstractTile, fireEvtType:String) : void
+		{
+			// TODO, cette vérif est à mettre autre part
+			if (tile.inGroup) tile = AbstractTile(tile.inGroup.owner);
+			
+			// fire
+			for each (var tr:TriggerProperties in getTriggerList(tile.ID, fireEvtType))
+				launchTrigger(tr, tile);
+		}
+		
+		/**
+		 *	Lance l'execution d'un trigger
 		 */
 		public function launchTrigger (triggerProps:TriggerProperties, sourceObj:Object = null) : void
 		{
+
 			if (!triggersEnabled) return;
 
+			// Test de validité
 			if (!isValidTrigger(triggerProps)) return;
-			
-			// on test si le trigger est un lien symbolique
-			var slink:TriggerProperties = TriggerProperties.list[triggerProps.symbLinkId];
+
 			var props:TriggerProperties = triggerProps;
-			if (slink != null)
+			// Test si trigger est un racourci vers un autre trigger
+			if (triggerProps.symbLinkId != -1)
 			{
-				if (!isValidTrigger(slink)) return;
-				props = slink;
+//				trace("info", "LINKED", triggerProps.symbLinkId);
+				var slink:TriggerProperties = TriggerProperties.list[triggerProps.symbLinkId];
+				if (slink != null)
+				{
+					if (!isValidTrigger(slink)) return;
+					props = slink;
+				}
 			}
 
-			// var props:TriggerProperties =  slink != null ? slink : triggerProps;
-			
-			// test sur conditions
-			/*if (!conditionResolver(props)) {
-				trace(this, "conditions requises", props.getCond("msg"));
-				return;
-			}*/
-			
-			// test passage d'arguments
+			// Passage d'arguments
 			if (sourceObj is ITrigger || slink != null)
 			{
 				var sourceProps:TriggerProperties = slink != null ? triggerProps : sourceObj.properties;
@@ -638,20 +769,12 @@ package ddgame.client.proxy {
 					var args:Array = String(sourceProps.arguments["passArgs"]).split(",");
 					var vals:Array = String(sourceProps.arguments["passVals"]).split(",");
 					var n:int = args.length;
-					while (--n > -1) {
+					while (--n > -1)
 						props.arguments[args[n]] = vals[n];
-					}
 				}
 			}
-			
-			// test sur le nombre de fois que le trigger peut être executé
-			// l'incrémenation des executions est faite dans triggerHandler
 
-//			if (props.fireCount == props.exec)
-			/*if (props.fireCount == props.maxFireCount)
-				return;*/
-
-			// on execute le trigger
+			// On init l'execution du trigger
 			var classRef:Class = triggerLocator.findTriggerClass(props.triggerClassId);
 			if (classRef)
 			{
@@ -659,20 +782,26 @@ package ddgame.client.proxy {
 				trigger.channel = channel;
 				trigger.properties = props;
 				trigger.sourceTarget = sourceObj;
-				tileTriggerInstances[trigger] = sourceObj;
+				tileTriggerInstances.push(trigger);
 				trigger.initialize();
-			} else {
-				trace("-- réf de classe [Trigger].CLASS_ID:" + props.triggerClassId + " non trouvée @" + this);
 			}
+			else
+			{ trace("error", this, " class trigger:", props.triggerClassId, " non trouvée"); }
 		}
 		
+		/**
+		 *	@private
+		 * Execute les triggers du début de scène
+		 */
 		public function fireOnInitMapTriggers () : void
 		{
-			var n:int = oninitMapTriggersProps.length;
-			while (--n > -1)
-				launchTrigger(oninitMapTriggersProps[n]);
-				
+			var t:int = getTimer();
+			for each (var tr:TriggerProperties in oninitMapTriggersProps)
+				launchTrigger(tr);
+
 			oninitMapTriggersProps = [];
+
+			initMapExex = getTimer() - t;	
 		}
 		
 		/**
@@ -695,27 +824,6 @@ package ddgame.client.proxy {
 				launchTrigger(triggerProps, sourceObj);
 		}
 		
-		// --- WIP ---
-		public function conditionResolver (t:TriggerProperties) : Boolean
-		{
-			// condition sur points du joueur
-			
-			// > "player points up" points du joeur suppérieur à
-			var b:Array = playerProxy.allPoints;
-			var c:* = t.getCond("ppu");
-			trace(this, "condition", c);
-			if (c)
-			{
-				for (var i:int = 0; i < 4; i++)
-				{
-					if (!c[i]) continue;
-					if (b[i] < c[i]) return false;
-				}
-			}
-			
-			return true;
-		}
-		
 		//--------------------------------------
 		//  EVENT HANDLERS
 		//--------------------------------------
@@ -728,10 +836,7 @@ package ddgame.client.proxy {
 		protected function triggerHandler (event:TriggerEvent) : void
 		{
 			var trigger:ITrigger = event.trigger;
-			delete tileTriggerInstances[trigger];
-			/*trigger.channel = null;
-			trigger.properties = props;
-			trigger.sourceTarget = sourceObj;*/
+
 
 			if (event.isDefaultPrevented()) return;
 						
@@ -743,6 +848,8 @@ package ddgame.client.proxy {
 					trigger.properties.fireCount++;					
 					// on lance les overrides
 					writeOverrideTrigger(trigger, 0);
+					// envoie au serveur
+					remotingProxy.triggerExecuted(trigger.properties.persist ? 0 : currentMap, trigger.properties.id);
 					break;
 				}
 				case TriggerEvent.COMPLETE :
@@ -762,94 +869,43 @@ package ddgame.client.proxy {
 						for (var i:int = 0; i < l; i++)
 							launchTriggerByID(tlist[i]);
 					}
+					var ind:int = tileTriggerInstances.indexOf(trigger);
+					_forgetTriggerInstance(trigger);
 					break;
 				}
 				case TriggerEvent.CANCELED :
 				{
 					// on lance les overrides
 					writeOverrideTrigger(trigger, 2);
+					_forgetTriggerInstance(trigger);
 					break;
 				}
 				default :
 				{ break; }
 			}
 			
-			/*if (event.type == TriggerEvent.COMPLETE)
-			{
-				// incrémentation du nombre d'éxcutions
-//				trigger.properties.exec++;
-				var p:Object = trigger.properties;
-				var fc:int = ++p.fireCount;
-
-				// injection de propriétés dans un autre trigger
-				// argument ovTrig "override trigger" :
-            // 	- type:Array
-				//		- entrées : evnt|eid|tid|prop|val|prop|val...
-				//				evnt	actif depuis
-				//						0 l'injection se fera à l'init du trigger
-				//						1 l'injection se fera àu complete du trigger
-				//						2 l'injection se fera àu cancel du trigger
-				//				eid	identifiant execution, -1 pour que l'écrasement des propriétées se
-				//						fasse à chaque fois
-				//				tid 	identifiant du trigger sur lequel les propriétées / arguments seront remplacées
-				//				prop	propriété argument à remplacer
-				//				val	valeur de remplacement
-				//		ex:
-				//			_ovT
-				//				- 1|3|maxFireCount|0  	< à toutes les exec le trigger va mettre la prop maxFireCount du trigger 3 à 0
-				//				- 3|2|url|toto.com		< à la 3 exec le trigger va mettre la prop url à toto.com
-								
-				
-				var ova:Array = trigger.getPropertie("_ovT");
-				if (ova)
-				{		
-					var o:Array;
-					var toi:Object;
-					for each (var ov:Object in ova)
-					{
-						// on regarde si le fireCount actuel correspond au "remplacement"
-						var indCount:int = int(ov.substring(0, ov.indexOf("|")));
-						if (indCount == fc || indCount == 0)
-						{
-							o = ov.split("|");
-							toi = getTrigger(o[1]);
-							if (toi)
-							{
-								for (var j:int = 2; j < o.length; j+=2) {
-									toi.setArgument(o[j], o[j+1]);
-//									trace("override", o[j], o[j+1]);
-								}
-							}
-						}
-					}
-				}
-				
-				// lancement des triggers chainés
-				var linkTriggerProps:TriggerProperties = TriggerProperties.linkedTriggerList[trigger.properties.id];
-				if (linkTriggerProps is TriggerProperties)
-				{
-					launchTrigger(linkTriggerProps);
-				}
-				else if (trigger.isPropertie("onComplete"))
-				{
-					var tlist:Array = String(trigger.getPropertie("onComplete")).split(",");
-					var l:int = tlist.length;
-					for (var i:int = 0; i < l; i++)
-						launchTriggerByID(tlist[i]);
-				}
+		}
+		
+		private function onTick (e:Event) : void
+		{
+			var ti:int = getTimer();
+			for each (var t:TriggerProperties in tickMapTriggersProps) {
+				launchTrigger(t);
 			}
-			else
-			{
-				// on est sur un trigger annulé
-			}*/
-			// nettoyage
-//			trigger.release();
-			
+
+			tickExec = getTimer() - ti;
 		}
 		
 		//--------------------------------------
 		//  PRIVATE & PROTECTED INSTANCE METHODS
 		//--------------------------------------
+		
+		private function _forgetTriggerInstance (trigger:Object) : void
+		{
+			var ind:int = tileTriggerInstances.indexOf(trigger);
+			if (ind > -1)
+				tileTriggerInstances.splice(ind, 1);
+		}
 		
 		// injection de propriétés dans un autre trigger
 		// argument ovTrig "override trigger" :
@@ -905,9 +961,10 @@ package ddgame.client.proxy {
 		 *	retourne la liste des triggers associé à une source
 		 *	pour un fireEventType donné
 		 */
-		private function getTriggerList (sourceId:String, fireEvtType:String) : Array
-		{
-			return tileTriggerProps[fireEvtType].find(sourceId);
+		public function getTriggerList (sourceId:String, fireEvtType:String) : Array
+		{ 
+			var props:Object = tileTriggerProps[fireEvtType];
+			return props ? props.find(sourceId) : null;
 		}
 				
 		/**
@@ -915,31 +972,29 @@ package ddgame.client.proxy {
 		 */
 		override public function initialize () : void
 		{
-				// Register the base Tile Triggers
+			// Reférencement des class de triggers
 			var tlist:Array /* of Class */ = BaseTriggerList.listTriggers();
-			var n:int = tlist.length;
-			while (--n > -1)
-			{
-				var classRef:Class = tlist[n];
+			for each (var classRef:Class in tlist)
 				triggerLocator.registerTriggerClass(classRef.CLASS_ID, classRef);
-			}
 			
-				// Initialize Tile Triggers Properties "HashMap"
-			n = TriggerProperties.fireTypeList.length;
-			while (--n > -1)
-			{
-				var fireType:String = TriggerProperties.fireTypeList[n];
+			// Initialize Tile Triggers Properties "HashMap"
+			for each (var fireType:String in TriggerProperties.fireTypeList)
 				tileTriggerProps[fireType] = new HashMap();
-			}
 			
-			// timer pour fire type 9
-			// timer = new Timer();
+			// Passage ref proxy
+			TriggerProperties.triggersProxy = this;
+
+			// timer pour firetype 9
+			tick = new Timer(100);
+			tick.addEventListener("timer", onTick);
+//			tick.start();
 			
-			
+			// Ecoute execution de triggers
 			channel.addEventListener(TriggerEvent.EXECUTE, triggerHandler);
 			channel.addEventListener(TriggerEvent.COMPLETE, triggerHandler);
 			channel.addEventListener(TriggerEvent.CANCELED, triggerHandler);
 			
+			// ref playerProxy
 			playerProxy = PlayerProxy(facade.getProxy(PlayerProxy.NAME));
 			
 		}

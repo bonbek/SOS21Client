@@ -5,8 +5,6 @@ package ddgame.client.triggers {
 	import flash.utils.Dictionary;
 	import ddgame.client.events.EventList;
 	import com.sos21.tileengine.events.TileEvent;
-	import ddgame.ApplicationFacade;
-	import ddgame.client.proxy.TileTriggersProxy;
 		
 	/**
 	 *	Class description.
@@ -38,6 +36,7 @@ package ddgame.client.triggers {
 		public static var list:Dictionary = new Dictionary(true);
 		public static var linkedTriggerList:Array = [];
 		public static var lastHighestId:int;
+		public static var triggersProxy:Object;
 		
 		//--------------------------------------
 		//  CONSTRUCTOR
@@ -84,26 +83,19 @@ package ddgame.client.triggers {
 
 		public var exec:int = 0;			// nombre de fois que le trigger à été exécuté
 		
-		public var symbLinkId:int = -1;	// lien symbolique à un autre trigger -1 = pas de lien
-//		public var initLink:int = -1;		// lien vers trigger executé avant celui-ci -1 = pas de lien
-//		public var completeLink:int = -1	// lien vers trigger après exécution de celui-ci -1 = pas de lien
+		public var symbLinkId:int = -1;	// lien symbolique à un autre trigger 0 = pas de lien
 		public var delay:int = 0;			// delai avant execution du trigger en millisecondes
-//		public var repeatCount:int			// nombre d'execution répétées
 		public var cond:Object;				// conditions
+		public var level:int = 0;			// actif sur niveau joueur : 0 pour tous niveaux
 		public var disable:int = 0;		// activé ou pas
+		
 		/**
 		 * Nombre d'execution du trigger pour la scène en cours
 		 */
 		public var fireCount:int = 0;
 		
-		public var refId:String;
-		/*public var activeFromMaps:Array;
-		public var inactiveFromMaps:Array;*/
-		
-		public function get triggersProxy () : TileTriggersProxy
-		{
-			return ApplicationFacade.getInstance().getProxy(TileTriggersProxy.NAME) as TileTriggersProxy;
-		}
+		public var refId:String;		
+
 		
 		/**
 		 *	Retourne l'identifiant de cette instance
@@ -174,7 +166,7 @@ package ddgame.client.triggers {
 		 *	du trigger au quel est lié symboliquement
 		 *	cette instance
 		 */
-		public function set linkageId(val:int):void
+		public function set linkageId (val:int) : void
 		{
 			_linkageId = val;
 			linkedTriggerList[_linkageId] = this;
@@ -184,7 +176,7 @@ package ddgame.client.triggers {
 		 *	Flag persistance
 		 */
 		public function get persist () : Boolean
-		{ return _arguments["persist"]; }
+		{ return _id < 0 || _arguments["persist"]; }
 		
 		public function set persist (val:Boolean) : void
 		{
@@ -216,7 +208,7 @@ package ddgame.client.triggers {
 		 *	associé à cette instance
 		 *	(voir fireTypeList)
 		 */
-		public function set fireType(val:int):void
+		public function set fireType (val:int) : void
 		{	
 			if (val != _fireType)
 			{
@@ -273,7 +265,7 @@ package ddgame.client.triggers {
 		 */
 		public function get isChained():Boolean
 		{
-			var li:Array = triggersProxy.allTriggersInMap;
+			var li:Array = triggersProxy.allTriggers;
 			var n:int = li.length;
 			var tr:Object;
 			var isc:Boolean = false;
@@ -294,7 +286,7 @@ package ddgame.client.triggers {
 		
 		public function get chainedTo () : Array
 		{
-			var li:Array = triggersProxy.allTriggersInMap;
+			var li:Array = triggersProxy.allTriggers;
 			var n:int = li.length;
 			var tr:Object;
 			var ch:Array = [];

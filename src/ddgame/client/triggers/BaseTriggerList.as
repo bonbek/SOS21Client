@@ -51,7 +51,9 @@ package ddgame.client.triggers {
 							ddgame.client.triggers.VimeoPlayerTrigger,
 							ddgame.client.triggers.AddBonusTrigger,
 							ddgame.client.triggers.ReachTrigger,
-							ddgame.client.triggers.TileActionTrigger
+							ddgame.client.triggers.TileActionTrigger,
+							ddgame.client.triggers.WriteEnvTrigger,
+							ddgame.client.triggers.SoundTrigger
 							/*ddgame.client.triggers.ScriptTrigger*/
 						]
 		}
