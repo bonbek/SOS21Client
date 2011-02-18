@@ -27,9 +27,17 @@ package ddgame.client.triggers {
 
 		override public function execute (e:Event = null) : void
 		{
+			// > points piraniak
+			sendPBonus(0, getPropertie("plev"));
+			// > points piraniak
+			sendPBonus(1, getPropertie("ppir"));
+			// > points social
 			sendPBonus(2, getPropertie("psoc"));
+			// > points economie
 			sendPBonus(3, getPropertie("peco"));
+			// > points environnement
 			sendPBonus(4, getPropertie("penv"));
+
 			complete();
 		}
 		
