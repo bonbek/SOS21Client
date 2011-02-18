@@ -50,9 +50,14 @@ package ddgame.client.commands {
 			facade.registerCommand(EventList.PLAYSTOP_SOUND, ddgame.client.commands.PlayStopSoundCommand);
 			facade.registerCommand(EventList.INJECT_TRIGGER, ddgame.client.commands.InjectTriggerCommand);
 			facade.registerCommand(EventList.INJECT_TRIGGERARGS, ddgame.client.commands.InjectTriggerArgsCommand);
+			facade.registerCommand(EventList.WRITE_ENV, ddgame.client.commands.WriteEnvCommand);
+
+			facade.registerCommand(EventList.ISOSCENE_BUILDED, ddgame.client.commands.BuildMapCommand);
 						
 			// Register Proxys
 			facade.registerProxy(LibProxy.NAME, new LibProxy());
+			// facade.registerProxy(ConditionResolverProxy.NAME, new ConditionResolverProxy());
+			facade.registerProxy(EnvProxy.NAME, new EnvProxy());
 			facade.registerProxy(TileFactoryProxy.NAME, new TileFactoryProxy());
 			facade.registerProxy(TileTriggersProxy.NAME, new TileTriggersProxy());
 			facade.registerProxy(DatamapProxy.NAME, new DatamapProxy());
