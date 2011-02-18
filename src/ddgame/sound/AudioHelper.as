@@ -13,6 +13,7 @@ package ddgame.sound {
 	import ddgame.sound.MultiTrackSound;
 	import ddgame.sound.SoundTrack;
 	import ddgame.events.EventList;
+	import flash.media.Sound;
 	
 	/**
 	 *	Helper gestion du sons
@@ -107,9 +108,9 @@ package ddgame.sound {
 		
 		/**
 		 * Lance la lecture de la musique
-		 *	@param loops int boucles (-1 pour répéter indéfiniment)
+		 *	@param loops int boucles (0 pour répéter indéfiniment)
 		 */
-		public function playMusic (loops:int = -1) : void
+		public function playMusic (loops:int = 0) : void
 		{
 			_music.play(0, loops);
 		}
@@ -164,52 +165,83 @@ package ddgame.sound {
 		
 		/**
 		 * Ajoute un son
-		 *	@param url String url du fichier son
+		 *	@param url String url du fichier son ou Objet son
 		 *	@param autoPlay Boolean lance la lecture
 		 */
-		public function addSound (url:String, autoPlay:Boolean) : SoundTrack
+		public function addSound (sndOrUrl:*, autoPlay:Boolean) : SoundTrack
 		{
-			if (_sounds[url]) return _sounds[url];
+			// Objet retour
+			var soundTrack:SoundTrack = getSound(sndOrUrl);
 			
-			var st:SoundTrack = new SoundTrack();
-			st.load(new URLRequest(url));
-			if (autoPlay) _sounds.play();
+			// On est sur un nouveau son
+			if (!soundTrack)
+			{
+				soundTrack = new SoundTrack();				
+				if (sndOrUrl is String) {
+					var url:String = sndOrUrl as String;
+					soundTrack.load(new URLRequest(url));
+					_sounds[url] = soundTrack;
+				}
+				else if (sndOrUrl is Sound) {
+					var snd:Sound = sndOrUrl as Sound;
+					soundTrack.sound = snd;
+					_sounds[snd.url] = soundTrack;
+				}
+			}
 			
-			return st;
+			if (autoPlay) soundTrack.play();
+			
+			return soundTrack;
 		}
 		
 		/**
 		 * Supprime un son
 		 *	@param url String url du fichier son
 		 */
-		public function removeSound (url:String) : void
+		public function removeSound (urlOrSnd:*) : void
 		{
-			var st:SoundTrack = _sounds[url];
+			var st:SoundTrack = getSound(urlOrSnd);
 			if(st)
 			{
 				if (st.isPlaying) st.stop();
-				delete _sounds[url];
+				delete _sounds[st.sound.url];
 			}
 		}
 		
-		/**
-		 * Retourne un son
-		 *	@param surl String
-		 *	@return SoundTrack
-		 */
-		public function getSound (url:String) : SoundTrack
+		public function removeSoundTrack (soundTrack:SoundTrack) : void
 		{
-			return _sounds[url];
+			removeSound(soundTrack.sound);
 		}
 		
 		/**
-		 * Lance la lecture un son ajouté précédement
+		 * Retourne un SoundTrack enregistré
+		 *	@param urlOrSnd String ou Sound
+		 *	@return SoundTrack
+		 */
+		public function getSound (urlOrSnd:*) : SoundTrack
+		{
+			var sndTrack:SoundTrack;
+			switch (true)
+			{
+				case urlOrSnd is String :
+					sndTrack = _sounds[urlOrSnd];
+					break;
+				case urlOrSnd is Sound :
+					sndTrack = _sounds[Sound(urlOrSnd).url];
+					break;
+			}
+
+			return sndTrack;
+		}
+		
+		/**
+		 * Lance la lecture d'un son ajouté précédement
 		 *	@param surl String url du fichier son
 		 *	@param loop int nombre de répétition
 		 */
-		public function playSound (url:String, loops:int = 0) : void
+		public function playSound (urlOrSnd:*, loops:int = 0) : void
 		{
-			var st:SoundTrack = _sounds[url];
+			var st:SoundTrack = getSound(urlOrSnd);
 			if (st)
 				st.play(0, loops);
 		}
@@ -218,9 +250,9 @@ package ddgame.sound {
 		 * Stope la lecture du son
 		 *	@param surl String url du fichier son
 		 */
-		public function stopSound (url:String) : void
+		public function stopSound (urlOrSnd:*) : void
 		{
-			var st:SoundTrack = _sounds[url];
+			var st:SoundTrack = getSound(urlOrSnd);
 			if (st)
 				st.stop();
 		}
