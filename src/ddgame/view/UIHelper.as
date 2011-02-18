@@ -210,6 +210,7 @@ package ddgame.view {
 				component.addEventListener(UIEvent.CLOSE_HELPSCREEN, onCloseHelpScreen);
 															
 			}
+			
 		}
 		
 		//--------------------------------------
@@ -233,7 +234,22 @@ package ddgame.view {
 					dt.level = playerProxy.level;
 					for each (var b:IBonus in blist)
 					{
-						dt["gauge" + b.theme] = b.gain;
+						switch (b.theme)
+						{
+							case 1 :
+								dt["gauge" + b.theme] = "piraniak  " + b.gain + "/10";
+								break;
+							case 2 :
+								dt["gauge" + b.theme] = "social  " + b.gain + "/100";
+								break;
+							case 3 :
+								dt["gauge" + b.theme] = b.gain + "/100  économie";
+								break;
+							case 4 :
+								dt["gauge" + b.theme] = b.gain + "/100  environnement";
+								break;
+						}
+//						dt["gauge" + b.theme] = b.gain;
 					}
 					e.data = dt;
 					break;
@@ -358,7 +374,7 @@ package ddgame.view {
 		//--------------------------------------
 		//  PRIVATE & PROTECTED INSTANCE METHODS
 		//--------------------------------------
-		
+
 		private function get datamapProxy () : DatamapProxy
 		{
 			return facade.getProxy(DatamapProxy.NAME) as DatamapProxy;
