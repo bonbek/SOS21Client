@@ -10,6 +10,7 @@ package ddgame.client.commands {
 	import ddgame.client.proxy.LibProxy;
 	import ddgame.client.view.PlayerHelper;
 	import ddgame.client.proxy.PlayerProxy;
+	import ddgame.client.events.EventList;
 	
 	/**
 	 *	
@@ -25,40 +26,51 @@ package ddgame.client.commands {
 		//  PUBLIC METHODS
 		//--------------------------------------
 		
-		public function execute(event:Event):void
+		public function execute (event:Event) : void
 		{
-			var dmProxy:DatamapProxy = DatamapProxy(facade.getProxy(DatamapProxy.NAME));
-			
-			// > triggers externes (voir StartUpdateMapCommand)
-			// recupération des classe de triggers externes pour enregistrement
-			// dans le locator
-			var trigLocator:TriggerLocator = TriggerLocator.getInstance();
-			var lib:LibProxy = LibProxy(facade.getProxy(LibProxy.NAME));
-			var triggerList:XMLList = ConfigProxy.getInstance().data.triggers;
-			
-			var extTriggers:Array = dmProxy.externalTriggers;
-			var n:int = extTriggers.length;
-			var trId:int;			// id de la classe trigger
-			var classDef:Class;	// définition de la classe trigger
-			while (--n > -1)
+			if (event.type == EventList.ISOSCENE_BUILDED)
 			{
-				trId = extTriggers[n];
-				// on recup la définition
-				classDef = lib.getDefinitionFrom(triggerList.trigger.(@id == trId).@url, triggerList.trigger.(@id == trId).@name);
-				// enregistre la classe
-				trigLocator.registerTriggerClass(trId, classDef);
+				if (event.isDefaultPrevented()) return;
+				// patch lancement des triggers à l'init des map
+				var trigProxy:TileTriggersProxy = TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME));
+				trigProxy.triggersEnabled = true;
+				trigProxy.fireOnInitMapTriggers();
 			}
-
-			dmProxy.parseData();
+			else
+			{
+				var dmProxy:DatamapProxy = DatamapProxy(facade.getProxy(DatamapProxy.NAME));
 			
-			// mise à jour du cookie
-//			var cookie:Object = PlayerProxy(facade.getProxy(PlayerProxy.NAME)).cookie;
-//			cookie.data.map = dmProxy.mapId;
-//			cookie.data.triggers = [];
-//			cookie.flush();
+				// > triggers externes (voir StartUpdateMapCommand)
+				// recupération des classe de triggers externes pour enregistrement
+				// dans le locator
+				var trigLocator:TriggerLocator = TriggerLocator.getInstance();
+				var lib:LibProxy = LibProxy(facade.getProxy(LibProxy.NAME));
+				var triggerList:XMLList = ConfigProxy.getInstance().data.triggers;
 			
-			// patch lancement des triggers à l'init des map
-			TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)).fireOnInitMapTriggers();
+				var extTriggers:Array = dmProxy.externalTriggers;
+				var n:int = extTriggers.length;
+				var trId:int;			// id de la classe trigger
+				var classDef:Class;	// définition de la classe trigger
+				while (--n > -1)
+				{
+					trId = extTriggers[n];
+					// on recup la définition
+					classDef = lib.getDefinitionFrom(triggerList.trigger.(@id == trId).@url, triggerList.trigger.(@id == trId).@name);
+					// enregistre la classe
+					trigLocator.registerTriggerClass(trId, classDef);
+				}
+			
+				// mise à jour variables locales joueur
+				PlayerProxy(facade.getProxy(PlayerProxy.NAME)).getData().locals = dmProxy.getData().playerLocals;
+				// lance la construction
+				dmProxy.parseData();
+				
+				// mise à jour du cookie
+	//			var cookie:Object = PlayerProxy(facade.getProxy(PlayerProxy.NAME)).cookie;
+	//			cookie.data.map = dmProxy.mapId;
+	//			cookie.data.triggers = [];
+	//			cookie.flush();
+				}
 		}
 				
 	}
