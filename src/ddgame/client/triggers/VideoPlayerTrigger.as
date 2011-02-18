@@ -34,7 +34,7 @@ package ddgame.client.triggers {
 		//  PRIVATE VARIABLES
 		//--------------------------------------
 		
-		[Embed(source='../../assets/videoPlayerControls.swf', symbol='SimpleControls')]
+		[Embed(source='../../../../assets/videoPlayerControls.swf', symbol='SimpleControls')]
 		private var videoControlsClass:Class;
 		
 		private var videoControls:MovieClip;

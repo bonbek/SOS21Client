@@ -39,11 +39,11 @@ package ddgame.client.view.components {
 		//  PRIVATE VARIABLES
 		//--------------------------------------
 		
-		[Embed(source="/ddgame/assets/Panel.swf", symbol="ButtonAssetSkinLeft")]
+		[Embed(source="../../../../../assets/Panel.swf", symbol="ButtonAssetSkinLeft")]
 		private var skinLeftAsset:Class;
-		[Embed(source="/ddgame/assets/Panel.swf", symbol="ButtonAssetSkinMiddle")]
+		[Embed(source="../../../../../assets/Panel.swf", symbol="ButtonAssetSkinMiddle")]
 		private var skinMiddleAsset:Class;
-		[Embed(source="/ddgame/assets/Panel.swf", symbol="ButtonAssetSkinRight")]
+		[Embed(source="../../../../../assets/Panel.swf", symbol="ButtonAssetSkinRight")]
 		private var skinRightAsset:Class;
 		
 		protected var _nsSprite:Sprite;		// Normal state display	

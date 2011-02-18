@@ -44,7 +44,7 @@ package ddgame.client.view.components {
 		//  PRIVATE VARIABLES
 		//--------------------------------------
 		
-		[Embed(source = "/ddgame/assets/ContextMenu.swf", symbol="ContextMenuSkin")]
+		[Embed(source = "../../../../../assets/ContextMenu.swf", symbol="ContextMenuSkin")]
 		private var skinAsset:Class;
 		private var skin:Sprite;
 		private var menuItemList:Array = [];

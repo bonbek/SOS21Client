@@ -654,21 +654,21 @@ import gs.easing.*;
  */
 internal class TButton extends DButton {
 	
-	[Embed(source="../../assets/transports/voiture.png")]
+	[Embed(source="../../../../assets/transports/voiture.png")]
 	public var voiture:Class;
-	[Embed(source="../../assets/transports/train.png")]
+	[Embed(source="../../../../assets/transports/train.png")]
 	public var train:Class;
-	[Embed(source="../../assets/transports/metro.png")]
+	[Embed(source="../../../../assets/transports/metro.png")]
 	public var metro:Class;
-	[Embed(source="../../assets/transports/tram.png")]
+	[Embed(source="../../../../assets/transports/tram.png")]
 	public var tram:Class;
-	[Embed(source="../../assets/transports/avion.png")]
+	[Embed(source="../../../../assets/transports/avion.png")]
 	public var avion:Class;	
-	[Embed(source="../../assets/transports/bus.png")]
+	[Embed(source="../../../../assets/transports/bus.png")]
 	public var bus:Class;	
-	[Embed(source="../../assets/transports/covoiture.png")]
+	[Embed(source="../../../../assets/transports/covoiture.png")]
 	public var covoiture:Class;	
-	[Embed(source="../../assets/transports/velo.png")]
+	[Embed(source="../../../../assets/transports/velo.png")]
 	public var velo:Class;
 	
 	//---------------------------------------

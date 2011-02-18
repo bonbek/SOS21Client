@@ -22,7 +22,7 @@ package ddgame.view {
 	 */
 	public class ProgressLogoHelper extends AbstractHelper {
 		
-		[Embed(source="../assets/progress_loader.swf", symbol="ProgressLogo")]
+		[Embed(source="../../../assets/progress_loader.swf", symbol="ProgressLogo")]
 		private var assetClass:Class;
 		
 //		private var assetClass:Class = DDgameFactory.assetClass;
