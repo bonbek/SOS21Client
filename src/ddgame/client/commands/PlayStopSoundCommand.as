@@ -33,7 +33,7 @@ package ddgame.client.commands {
 				// lecture d'un son
 				case EventList.PLAY_SOUND :
 				{
-					var loops:int = data.loop ? data.loop : -1;
+					var loops:int = data.loop ? data.loop : 0;
 					var snd:Object = soundHelper.getSound(url);
 					if (!snd)
 					{
@@ -51,7 +51,7 @@ package ddgame.client.commands {
 			 	// switch lecture / stop d'un son
 				case EventList.PLAYSTOP_SOUND :
 				{
-					loops = data.loop ? data.loop : -1;
+					loops = data.loop ? data.loop : 0;
 					snd = soundHelper.getSound(url);
 					if (snd)
 					{
