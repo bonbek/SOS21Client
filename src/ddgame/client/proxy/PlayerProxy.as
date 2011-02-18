@@ -5,7 +5,7 @@ package ddgame.client.proxy {
 	import flash.net.SharedObject;
 	import com.sos21.events.BaseEvent;
 	import com.sos21.proxy.AbstractProxy;
-	
+	import ddgame.server.proxy.RemotingProxy;	
 	import ddgame.events.EventList;
 	import ddgame.vo.ITheme;
 	import ddgame.vo.IBonus;
@@ -56,10 +56,10 @@ package ddgame.client.proxy {
 		//  GETTER/SETTERS
 		//--------------------------------------
 		
-		public function get cookie () : SharedObject
+		/*public function get cookie () : SharedObject
 		{
 			return SharedObject.getLocal("player" + _data.id);
-		}
+		}*/
 		
 		public function get username () : String
 		{
@@ -74,10 +74,53 @@ package ddgame.client.proxy {
 			}
 		}
 		
+		/**
+		 * Identifiant joueur
+		 */
 		public function get id () : int
-		{
-			return _data.id;
-		}
+		{ return _data.id; }
+		
+		/**
+		 * Niveau
+		 */
+		public function get level () : int
+		{ return _bonus[0]; }
+		
+		public function set level (val:int) : void
+		{ _bonus[0] = val; }
+		
+		/**
+		 * Classe
+		 */
+		public function get classe () : String
+		{ return _data.profile.classe; }
+	
+		public function set classe (val:String) : void
+		{ _data.profile.classe = val; }
+		
+		/**
+		 * Retourne points en économie
+		 */
+		public function get pir () : int
+		{ return _bonus[1]; }
+		
+		/**
+		 * Retourne points en économie
+		 */
+		public function get soc () : int
+		{ return _bonus[2]; }
+		
+		/**
+		 * Retourne points en économie
+		 */
+		public function get eco () : int
+		{ return _bonus[3]; }
+		
+		/**
+		 * Retourne points en environnement
+		 */
+		public function get env () : int
+		{ return _bonus[4]; }		
 		
 		/**
 		 *	Retourne true si l'ustilisateur est en
@@ -98,8 +141,9 @@ package ddgame.client.proxy {
 		
 		/**
 		 * l'identifiant de la dernière map vistée
+		 * ????
 		 */
-		public function get lastVisitedMapId ():int
+		public function get lastVisitedMapId () : int
 		{
 			return 0;
 		}
@@ -135,32 +179,7 @@ package ddgame.client.proxy {
 		public function get allPoints () : Array
 		{
 			return _bonus.slice(1);
-		}
-		
-		public function get level () : int
-		{
-			return _data.profile.level;
-		}
-		
-		public function set level (val:int) : void
-		{
-			_data.profile.level = val;
-		}
-		
-		public function set classe (val:String) : void
-		{
-			_data.profile.classe = val;
-		}
-		
-		public function get classe () : String
-		{
-			return _data.profile.classe;
-		}
-		
-		/*public function get classe () : String
-		{
-			
-		}*/
+		}				
 		
 		//--------------------------------------
 		//  PUBLIC METHODS
@@ -170,7 +189,7 @@ package ddgame.client.proxy {
 		 * Ajoute au bonus
 		 *	@param bonus IBonus
 		 */
-		public function addBonus (bonus:IBonus) : void
+		public function addBonus (bonus:Object) : void
 		{
 			var npoints:int = bonus.gain;
 			if (!npoints || npoints == 0) return;
@@ -182,6 +201,7 @@ package ddgame.client.proxy {
 			if (!evt.isDefaultPrevented())
 			{
 				_bonus[bonus.theme] = opoints;
+//				RemotingProxy(facade.getProxy(RemotingProxy.NAME)).playerBonus({theme:bonus.theme, gain:bonus.gain});
 			}
 			
 			// WIP stockage points dans cookie
@@ -197,7 +217,7 @@ package ddgame.client.proxy {
 			}*/
 		}
 		
-		public function setBonus (bonus:IBonus) : void
+		public function setBonus (bonus:Object) : void
 		{
 			_bonus[bonus.theme] = bonus.gain;
 			sendEvent(new BaseEvent(EventList.PLAYER_BONUS_CHANGED, bonus));
@@ -213,6 +233,30 @@ package ddgame.client.proxy {
 			return null;
 		}
 		
+		public function getGlobalEnv (key:String) : *
+		{ return _data.globals[key]; }
+		
+		public function setGlobalEnv (key:String, value:*) : void
+		{
+			if (value == "_|DEL|_") delete _data.globals[key];				
+			else
+				_data.globals[key] = value;
+
+			RemotingProxy(facade.getProxy(RemotingProxy.NAME)).playerEnv("g", key, value);
+		}
+
+		public function getLocalEnv (key:String) : *
+		{  return _data.locals[key]; }
+
+		public function setLocalEnv (key:String, value:*) : void
+		{
+			if (value == "_|DEL|_") delete _data.locals[key];
+			else
+				_data.locals[key] = value;
+
+			RemotingProxy(facade.getProxy(RemotingProxy.NAME)).playerEnv("l", key, value);
+		}
+		
 		/**
 		 *	@param o Object
 		 */
@@ -221,12 +265,23 @@ package ddgame.client.proxy {
 			var notify:Boolean = _data;
 			_data = o;
 			
+			/*trace(_data.globals);
+			for (var v:String in _data.globals);
+				trace(this, v);*/
+			
 			// ... points
-			_bonus.push(null);
-			_bonus.push(_data.profile.level);
+//			_bonus.push(null);
+//			_bonus.push(_data.profile.level);
+			// niveau
 			_bonus.push(_data.profile.bonus[0]);
+			// points piraniak
 			_bonus.push(_data.profile.bonus[1]);
+			// points social
 			_bonus.push(_data.profile.bonus[2]);
+			// points éco
+			_bonus.push(_data.profile.bonus[3]);
+			// points environnement
+			_bonus.push(_data.profile.bonus[4]);
 			
 			if (notify)
 				sendEvent (new BaseEvent(EventList.PLAYER_REFRESHED));			
