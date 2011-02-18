@@ -13,12 +13,13 @@ package ddgame.client.triggers {
 	import flash.filters.DropShadowFilter;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
-	
+
 	import flash.net.URLRequest;
 	
 	import com.sos21.events.BaseEvent;
 	import com.sos21.events.ApplicationChannel;
 	import com.sos21.proxy.ConfigProxy;
+	import ddgame.client.view.PlayerHelper;
 	
 	import com.sos21.tileengine.core.AbstractTile;
 	import ddgame.client.triggers.AbstractTrigger;
@@ -116,7 +117,7 @@ package ddgame.client.triggers {
 				ApplicationChannel.getInstance().addEventListener(PublicServerEventList.ON_DATACONTENT, dataContentHandler);
 				sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATACONTENT, getPropertie("id")));
 				sendEvent(new Event(EventList.FREEZE_SCENE));
-				sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, true));
+//				sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, true));
 				return;
 			}
 			
@@ -137,7 +138,7 @@ package ddgame.client.triggers {
 		{
 			ApplicationChannel.getInstance().removeEventListener(PublicServerEventList.ON_DATACONTENT, dataContentHandler);
 			setPropertie("text", event.content.body);
-			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
+//			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
 			sendEvent(new Event(EventList.UNFREEZE_SCENE));
 			_build();
 		}
@@ -300,8 +301,12 @@ package ddgame.client.triggers {
 		 */
 		protected function _build():void
 		{
+//			PlayerHelper(facade.getObserver(PlayerHelper.NAME)).displayTalk(getPropertie("text"));
+//			return;
+			
 			// on recup l'asset
-			var classRef:Class = LibProxy(facade.getProxy(LibProxy.NAME)).lib.getClassFrom("lib/HtmlPopup.swf", isPropertie("skin") ? getPropertie("skin") : "DefaultPopup");
+			var libProxy:LibProxy = LibProxy(facade.getProxy(LibProxy.NAME));
+			var classRef:Class = libProxy.lib.getClassFrom(libProxy.libPath + "HtmlPopup.swf", isPropertie("skin") ? getPropertie("skin") : "DefaultPopup");
 			_component = new classRef;
 			_component.manager = this;
 			

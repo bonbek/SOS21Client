@@ -107,7 +107,7 @@ package ddgame.client.triggers {
 			
 			if (_queue.length > 0)
 			{
-				sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, true));
+//				sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, true));
 				sendEvent(new Event(EventList.FREEZE_SCENE));
 				callForData();
 			} else {
@@ -141,7 +141,7 @@ package ddgame.client.triggers {
 		private function dataQuizHandler(event:BaseEvent):void
 		{
 //			trace("data received");
-			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
+//			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
 			ApplicationChannel.getInstance().removeEventListener(PublicServerEventList.ON_DATAQUIZ, dataQuizHandler);
 			// on stock les data brutes
 			data = event.content;
