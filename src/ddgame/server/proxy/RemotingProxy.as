@@ -47,6 +47,9 @@ package ddgame.server.proxy {
 		public static var playerDataCall:ServiceCall = new ServiceCall("getPlayerData");
 		public static var updatePlayerCall:ServiceCall = new ServiceCall("updatePlayer");
 		public static var playerBonusCall:ServiceCall = new ServiceCall("playerBonus");
+		public static var triggerExecutedCall:ServiceCall = new ServiceCall("triggerExecuted");
+		public static var playerEnvCall:ServiceCall = new ServiceCall("playerEnv");
+		public static var globalsCall:ServiceCall = new ServiceCall("Globals");
 		
 		//--------------------------------------
 		// CLASS CONSTANTS
@@ -66,7 +69,10 @@ package ddgame.server.proxy {
 		//--------------------------------------
 		//  GETTER/SETTERS
 		//--------------------------------------
-			
+		
+		public function get service () : Service
+		{ return _service; }
+		
 		//--------------------------------------
 		//  PUBLIC METHODS
 		//--------------------------------------
@@ -76,27 +82,23 @@ package ddgame.server.proxy {
 			_service.callService(mapListCall);
 		}
 		
-		public function getDataMap(nid:int, entryPoint:String, removeTriggers:String):void
-		{
-			addServiceListener(dataMapCall);
+		public function getDataMap(nid:int, entryPoint:String, removeTriggers:String) : void
+		{			
 			_service.callService(dataMapCall, nid, entryPoint, removeTriggers);
 		}
 		
-		public function getDataQuiz (nid:int):void
+		public function getDataQuiz (nid:int) : void
 		{
-			addServiceListener(dataQuizCall);
 			_service.callService(dataQuizCall, nid);
 		}
 		
-		public function getDataContent (nid:int):void
+		public function getDataContent (nid:int) : void
 		{
-			addServiceListener(dataContentCall);
 			_service.callService(dataContentCall, nid);
 		}
 		
-		public function saveDataContent (nid:int, data:String):void
+		public function saveDataContent (nid:int, data:String) : void
 		{
-			addServiceListener(saveDataContentCall);
 			_service.callService(saveDataContentCall, nid, data);
 		}
 		
@@ -105,9 +107,8 @@ package ddgame.server.proxy {
 		 *	@param semail String			email de connection
 		 *	@param spassword String		mot de passe encrypté
 		 */
-		public function getUserData (semail:String, sencPassword:String):void
+		public function getUserData (semail:String, sencPassword:String) : void
 		{
-			addServiceListener(userDataCall);
 			_service.callService(userDataCall, semail, sencPassword, true);
 		}
 		
@@ -117,7 +118,6 @@ package ddgame.server.proxy {
 		 */
 		public function updateUser (userId:int, oUpdate:Object):void
 		{
-			addServiceListener(updateUserCall);
 			_service.callService(updateUserCall, oUpdate);
 		}
 		
@@ -127,7 +127,6 @@ package ddgame.server.proxy {
 		 */
 		public function updatePlayer (playerId:int, props:Object) : void
 		{
-			addServiceListener(updatePlayerCall);
 			_service.callService(updatePlayerCall, playerId, props);
 		}
 		
@@ -139,7 +138,6 @@ package ddgame.server.proxy {
 		 */
 		public function createPlayer (userId:int, dataPlayer:Object = null, autoLink:Boolean = true):void
 		{
-			addServiceListener(createPlayerCall);
 			_service.callService(createPlayerCall, userId, dataPlayer, autoLink);
 		}
 		
@@ -149,15 +147,30 @@ package ddgame.server.proxy {
 		 */
 		public function getPlayerData (playerId:int):void
 		{
-			addServiceListener(playerDataCall);
 			_service.callService(playerDataCall, playerId);
 		}
 		
 		// TEMP
 		public function playerBonus (bonus:Object):void
 		{
-			addServiceListener(playerBonusCall);
 			_service.callService(playerBonusCall, bonus);
+		}
+		
+		public function triggerExecuted (mapId:int, triggerId:int) : void
+		{
+			_service.callService(triggerExecutedCall, mapId, triggerId);
+		}
+		
+		public function playerEnv (domain:String, key:String, value:*) : void 
+		{
+			_service.callService(playerEnvCall, domain, key, value);
+		}
+		
+		public function Globals (operation:String, params:Object = null) : ServiceCall
+		{
+			_service.callService(globalsCall, operation, params);
+
+			return globalsCall;
 		}
 		
 		public function connect (gatewayURL:String, credentials:Object = null):void
@@ -186,10 +199,10 @@ package ddgame.server.proxy {
 			sendPublicEvent(new BaseEvent(PublicServerEventList.ON_DATAMAP, yamlMap));
 		}
 		
-		private function handleServiceCall(event:ServiceEvent):void
+		private function handleServiceCall (event:ServiceEvent) : void
 		{
 			var sc:ServiceCall = event.serviceCall;
-			removeServiceListener(sc);
+//			removeServiceListener(sc);
 			
 			if (event.failed)
 			{
@@ -214,11 +227,7 @@ package ddgame.server.proxy {
 				}
 				case dataMapCall :
 				{
-//					trace( o.collisions );
-//					trace( o.tileList );
-//					trace( o.tileTriggers );
 					var yamlMap : Dictionary = YAML.decode(String(event.result)) as Dictionary;
-//					var yamlMap:Object = YAML.decode(String(event.result));
 					sendPublicEvent(new BaseEvent(PublicServerEventList.ON_DATAMAP, yamlMap));
 //					sendPublicEvent(new BaseEvent(PublicServerEventList.ON_DATAMAP, event.result));
 					break;
@@ -271,12 +280,12 @@ package ddgame.server.proxy {
 		//  PRIVATE & PROTECTED INSTANCE METHODS
 		//--------------------------------------
 		
-		private function addServiceListener (sc:ServiceCall):void
+		private function addServiceListener (sc:ServiceCall) : void
 		{
 			_service.addServiceListener(sc, handleServiceCall, false, 0, true);
 		}
 		
-		private function removeServiceListener (sc:ServiceCall):void
+		private function removeServiceListener (sc:ServiceCall) : void
 		{
 			_service.removeServiceListener(sc, handleServiceCall);
 		}
@@ -285,6 +294,16 @@ package ddgame.server.proxy {
 		{
 				// Services
 			_service.service = "sos21Services";
+			addServiceListener(dataMapCall);
+			addServiceListener(dataQuizCall);
+			addServiceListener(dataContentCall);			
+			addServiceListener(saveDataContentCall);			
+			addServiceListener(userDataCall);			
+			addServiceListener(updateUserCall);			
+			addServiceListener(updatePlayerCall);			
+			addServiceListener(createPlayerCall);			
+			addServiceListener(playerDataCall);			
+			addServiceListener(playerBonusCall);			
 		}
 		
 	}
