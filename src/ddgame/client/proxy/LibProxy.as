@@ -50,7 +50,9 @@ package ddgame.client.proxy {
 		//---------------------------------------
 	
 		public var tilesPath:String;	// chemin racine bibliotheque des tiles
-		
+		public var libPath:String;
+		public var spritesPath:String;
+		public var layersPath:String = "";
 		
 		//--------------------------------------
 		//  GETTER/SETTERS
@@ -59,7 +61,7 @@ package ddgame.client.proxy {
 		/**
 		 * Additional getter to return the correct data type
 		 */
-		public function get lib():GLib
+		public function get lib () : GLib
 		{
 			return _lib;
 		}
@@ -72,7 +74,7 @@ package ddgame.client.proxy {
 		 *	Ajoute un fichier à charger à la librairie
 		 *	@param	url	 url du fichier
 		 */
-		public function createLoader(url:String, forceBinary:Boolean = false):void
+		public function createLoader (url:String, forceBinary:Boolean = false) : void
 		{
 			_lib.addFile(url, forceBinary);
 		}
@@ -129,7 +131,7 @@ package ddgame.client.proxy {
 		/**
 		 *	Efface toutes les références (chargées ou non)
 		 */
-		public function clear():void
+		public function clear () : void
 		{
 			_lib.clear();
 		}
@@ -173,6 +175,9 @@ package ddgame.client.proxy {
 		override public function initialize():void
 		{
 			tilesPath = ConfigProxy.getInstance().getContent("tiles_path");
+			libPath = ConfigProxy.getInstance().getContent("lib_path");
+			spritesPath = ConfigProxy.getInstance().getContent("sprites_path");
+			layersPath = ConfigProxy.getInstance().getContent("layers_path");
 		}
 
 	}

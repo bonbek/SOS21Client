@@ -97,6 +97,10 @@ package ddgame.commands {
 				
 //				var mdebbug:MonsterDebugger = new MonsterDebugger(evtContent.documentRoot.stage);
 				
+				if (ConfigProxy.getInstance().getContent("debug") == "true")
+				{
+				}
+				
 				trace(this, "Application initialized");
 			}
 			else

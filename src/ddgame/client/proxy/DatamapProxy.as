@@ -146,6 +146,9 @@ package ddgame.client.proxy {
 			return ("location" in _data) ? _data.location : {adress:"",lat:0,lon:0};
 		}
 		
+		public function get env () : Array
+		{ return ("env" in _data) ? _data.env : []; }
+		
 		public function set data (value:Object):void {
 			if (_data)
 			{

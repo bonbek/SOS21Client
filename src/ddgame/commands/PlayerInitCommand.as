@@ -83,7 +83,8 @@ package ddgame.commands {
 							case PublicServerEventList.ON_PLAYER_LOADED :
 							{
 								// suppression éventuelle du module première connection
-								if (facade.getObserver(FirstConnexionHelper.NAME)) {
+								if (facade.getObserver(FirstConnexionHelper.NAME))
+								{
 									FirstConnexionHelper(facade.getObserver(FirstConnexionHelper.NAME)).release();
 									// relache de l'ui
 									UIHelper(facade.getObserver(UIHelper.NAME)).component.enabled = true;

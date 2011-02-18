@@ -77,7 +77,7 @@ package ddgame.client.triggers {
 						_eventContent[p] = val;
 					}
 				} else {
-					_eventType = val;						
+					_eventType = val;			
 				}
 			}
 			

@@ -166,6 +166,11 @@ package ddgame.client.view {
 					stage.removeEventListener(MouseEvent.CLICK, handleEvent, true);
 					component.stop();
 					timer.reset();
+					if (ballon)
+					{
+						ballon.data.stopAutoLife = false;
+						removeBallon();
+					}
 					break;
 				}
 				case TimerEvent.TIMER :
@@ -202,7 +207,7 @@ package ddgame.client.view {
 		{
 			if (component) return;
 			
-			var cl:Class = libProxy.getDefinitionFrom("sprites/AvatarSkins.swf", _skin.className);
+			var cl:Class = libProxy.getDefinitionFrom(libProxy.spritesPath + "AvatarSkins.swf", _skin.className);
 			var mc:MovieClip = new cl();
 			
 			// --> Patch pour scale du perso 
@@ -275,7 +280,8 @@ package ddgame.client.view {
 		 */
 		override protected function listInterest() : Array
 		{
-			return [ EventList.ISOSCENE_BUILDED ];
+			return [ EventList.ISOSCENE_BUILDED,
+			 			EventList.CLEAR_MAP ];
 		}
 
 	}
