@@ -22,7 +22,7 @@ package ddgame.client.view {
 	import ddgame.client.proxy.DatamapProxy;
 	import ddgame.client.proxy.TileTriggersProxy;
 	import ddgame.client.view.HelperList;
-	import ddgame.client.view.PlayerHelper;
+	import ddgame.client.view.*;
 	import ddgame.view.UIHelper;
 	
 	/**
@@ -61,6 +61,7 @@ package ddgame.client.view {
 		
 		private var datamapProxy:DatamapProxy;
 		private var triggersProxy:TileTriggersProxy;
+		private var libProxy:LibProxy;
 		private var lib:GLib;
 		private var _isoScene:IsoTileWorld;
 		
@@ -98,11 +99,11 @@ package ddgame.client.view {
 
 			var fgFile:String = datamapProxy.foregroundFile;
 			if (fgFile)
-				_isoScene.foregroundLayer.addGfx(lib.getLoader(fgFile));
+				_isoScene.foregroundLayer.addGfx(lib.getLoader(libProxy.layersPath + fgFile));
 
 			var bgFile:String = datamapProxy.backgroundFile;
 			if (bgFile)
-				_isoScene.backgroundLayer.addGfx(lib.getLoader(bgFile));
+				_isoScene.backgroundLayer.addGfx(lib.getLoader(libProxy.layersPath + bgFile));
 
 				// calcul offset de centrage
 			var ofs:Point = _isoScene.drawer.findPoint(new UPoint(0, Math.floor(datamapProxy.dimy * .5) , 0, datamapProxy.tilew, datamapProxy.tileh, datamapProxy.tiled));			
@@ -154,9 +155,17 @@ package ddgame.client.view {
 //					t.mouseEnabled = false;
 				}
 				
-				_isoScene.sceneLayer.addTile(t);
-				// on envoie un event tile ajouté à la scène
-				sendEvent(new BaseEvent(EventList.ISOSCENE_TILE_ADDED, t));
+				if (t.data.pnj)
+				{
+					facade.registerObserver(t.ID, new PNJHelper(t.ID, t))
+				}
+				else
+				{
+					_isoScene.sceneLayer.addTile(t);
+					// on envoie un event tile ajouté à la scène
+					sendEvent(new BaseEvent(EventList.ISOSCENE_TILE_ADDED, t));
+				}
+				
 			}
 						
 			// on ajoute les listeners pour les events souris sur les tiles
@@ -173,8 +182,8 @@ package ddgame.client.view {
 			
 //			unfreezeScene();
 			
-			sendEvent(new Event(PublicIsoworldEventList.ISOSCENE_BUILDED));
-			sendPublicEvent(new Event(PublicIsoworldEventList.ISOSCENE_BUILDED));
+			sendEvent(new Event(PublicIsoworldEventList.ISOSCENE_BUILDED, true, true));
+			sendPublicEvent(new Event(PublicIsoworldEventList.ISOSCENE_BUILDED, true, true));
 		}
 		
 		public function addListeners():void
@@ -413,8 +422,10 @@ trace(up.posToString() + " @" + toString());
 			datamapProxy = DatamapProxy(facade.getProxy(DatamapProxy.NAME));
 			// au TriggerProxy	
 			triggersProxy = TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME));
+
 			// à la librairie
-			lib = LibProxy(facade.getProxy(LibProxy.NAME)).lib;
+			libProxy = LibProxy(facade.getProxy(LibProxy.NAME));
+			lib = libProxy.lib;
 		}
 		
 		//--------------------------------------
