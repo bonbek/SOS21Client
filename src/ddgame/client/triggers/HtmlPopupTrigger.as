@@ -214,82 +214,7 @@ package ddgame.client.triggers {
 			}
 			// on ferme la popup
 			if (autoClose) complete();
-		}
-		/**
-		 *	@private
-		 *	handler édition du contenu
-		 */
-		protected function editContentHandler(event:Event = null):void
-		{
-			// on reçois les datas mises à jours
-			if (event.type == PublicServerEventList.ON_DATACONTENT)
-			{
-				ApplicationChannel.getInstance().removeEventListener(PublicServerEventList.ON_DATACONTENT, editContentHandler);
-				_component.removeChild(_saveMessage);
-				_component.addChildAt(_component.background, 0);
-				setPropertie("text", BaseEvent(event).content.body);
-				return;
-			}
-			// events sur boutons
-			switch (event.target)
-			{
-				case _editButton : // on entre en édition
-				{
-					_component.removeChild(_editButton);
-					_component.htmlContent.styleSheet = null;
-					_component.htmlContent.mouseEnabled = true;
-					_component.background.mouseEnabled = true;
-					_component.autoResize = false;
-					_component.height = _component.maxHeight;
-					_component.htmlContent.removeEventListener(TextEvent.LINK, componentLinkHandler, false);
-					_component.addScrollBar();
-					
-					// mise en place de l'éditeur
-					var classRef:Class = LibProxy(facade.getProxy(LibProxy.NAME)).lib.getClassFrom("lib/HtmlPopup.swf", "com.sos21.components.texteditor.TextEditor");
-					_editor = new classRef;
-					_editor.spin();
-					_editor.target = _component.htmlContent;
-					Sprite(_editor).x = 210;
-					Sprite(_editor).y = 310;
-					stage.addChild(Sprite(_editor));
-					// bouton sauvegarder & sortir edition
-					classRef = LibProxy(facade.getProxy(LibProxy.NAME)).lib.getClassFrom("lib/HtmlPopup.swf", "SaveButton");
-					_saveButton = new classRef;
-					_saveButton.addEventListener(MouseEvent.CLICK, editContentHandler, false, 0, true);
-					classRef = LibProxy(facade.getProxy(LibProxy.NAME)).lib.getClassFrom("lib/HtmlPopup.swf", "UnEditButton");
-					_unEditButton = new classRef
-					_unEditButton.addEventListener(MouseEvent.CLICK, editContentHandler, false, 0, true);
-					// ajout d'une ligne avec les bouttons dans l'éditeur
-					var row:Object = _editor.createToolRow();
-					row.addChild(_saveButton);
-					row.addChild(_unEditButton);
-					_editor.addToolRow(row);					
-					break;
-				}
-				case _saveButton :
-				{
-					classRef = LibProxy(facade.getProxy(LibProxy.NAME)).lib.getClassFrom("lib/HtmlPopup.swf", "SaveMessage");
-					_saveMessage = new classRef;
-					_saveMessage.x = (_component.width - _saveMessage.width) / 2;
-					_saveMessage.y = (_component.height - _saveMessage.height) / 2;
-					_component.addChild(_component.background);
-					_component.addChild(_saveMessage);
-					ApplicationChannel.getInstance().addEventListener(PublicServerEventList.ON_DATACONTENT, editContentHandler);
-					sendPublicEvent(new BaseEvent(PublicServerEventList.SAVE_DATACONTENT, {id:getPropertie("id"), data:_editor.getHtml()}));
-					break;
-				}
-				case _unEditButton :
-				{
-					closeEditor();
-					addEditButton();
-					_component.htmlContent.addEventListener(TextEvent.LINK, componentLinkHandler, false, 0, true);
-					_component.htmlContent.styleSheet = htmlStyleSheet;
-					_component.text = getPropertie("text");
-					break;
-				}
-			}
-		}
-		
+		}		
 		
 		//--------------------------------------
 		//  PRIVATE & PROTECTED INSTANCE METHODS
@@ -356,11 +281,6 @@ package ddgame.client.triggers {
 
 			// on passe le texte
 			_component.text = getPropertie("text");
-
-			// si on est en debugg, ajout de l'edition
-			if (ConfigProxy.getInstance().getContent("debug") != "no") {
-				addEditButton();
-			}
 	
 			// fx d'aparition
 			TweenLite.from(_component, 0.5, {tint:0xffffff});
@@ -381,37 +301,6 @@ package ddgame.client.triggers {
 		}
 		
 		/**
-		 *	@private
-		 *	Ajoute le bouton pour entrer en édition
-		 */
-		private function addEditButton():void
-		{
-			var classRef:Class = LibProxy(facade.getProxy(LibProxy.NAME)).lib.getClassFrom("lib/HtmlPopup.swf", "EditButton");
-			_editButton = new classRef;
-			_editButton.x = _component.closeButton.x - _editButton.width;
-			_editButton.y = (_component.background.y + _component.background.height) - _editButton.height;
-			_editButton.addEventListener(MouseEvent.CLICK, editContentHandler, false, 0, true);
-			_component.addChild(_editButton);
-		}
-		
-		/**
-		 *	@private
-		 *	Ferme l'éditeur
-		 */
-		private function closeEditor():void
-		{
-			_editButton.removeEventListener(MouseEvent.CLICK, editContentHandler, false);
-			_unEditButton.removeEventListener(MouseEvent.CLICK, editContentHandler, false);
-			_saveButton.removeEventListener(MouseEvent.CLICK, editContentHandler, false);
-			_editor.releaseTarget();
-			stage.removeChild(Sprite(_editor));
-			_editButton = null;
-			_unEditButton = null;
-			_saveButton = null;
-			_editor = null;
-		}
-		
-		/**
 		 *	@inheritDoc
 		 */
 		override protected function complete(event:Event = null):void
@@ -428,11 +317,6 @@ package ddgame.client.triggers {
 			{
 				_component.removeEventListener("closePopup", complete, false);
 				TweenLite.to(_component, 0.1, {tint:0xffffff, onComplete:stage.removeChild, onCompleteParams:[_component]})
-			}
-			// si on est en édition
-			if (_editor)
-			{
-				closeEditor();
 			}
 			
 			super.complete();
