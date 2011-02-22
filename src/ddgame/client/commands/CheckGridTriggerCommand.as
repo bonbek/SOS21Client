@@ -52,7 +52,7 @@ package ddgame.client.commands {
 			if (proxy.isTrigger(id, etype))
 			{
 //				trace("is trigger")
-				proxy.launchTriggerByRef(id, etype);
+				proxy.launchTriggerByRef(id, etype, id);
 			}
 		}
 		
