@@ -8,6 +8,7 @@ package ddgame.client.triggers {
 	import ddgame.sound.AudioHelper;	
 	import ddgame.client.proxy.LibProxy;
 	import ddgame.client.view.PlayerHelper;
+	import ddgame.client.view.IsosceneHelper;
 
 	/**
 	 *	Trigger jouer un son
@@ -70,25 +71,28 @@ package ddgame.client.triggers {
 					soundTrack.play(0, loops);
 					
 					// Option son spatial
-					var sp:Object = getPropertie("sp");
+					var sp:String = getPropertie("sp");
 					if (sp)
-					{						
-						// recup poistion de la source déclencheuse
-						if (String(sp).indexOf("-") > -1)
+					{
+						switch (true)
 						{
-							// on est sur une source type définie dans le trigger
-							// pour l'instant coordonnées (cf cellule)
-							spatialSource = new SpatialSource(String(sp).split("-"));
-						}
-						else if (sourceTarget is AbstractTile)
-						{
+							// on est sur une source définie dans le trigger type objet
+							case isosceneHelper.getTile(sp) != null:
+								spatialSource = new SpatialSource(isosceneHelper.getTile(String(sp)));
+								break;
+							// on est sur une source définie dans le trigger type cellule
+							case String(sp).indexOf("-") > -1 :
+								spatialSource = new SpatialSource(String(sp).split("-"));
+								break;
 							// on est sur une source type objet
-							spatialSource = new SpatialSource(sourceTarget);
-						}
-						else if (String(sourceTarget).indexOf("-") > -1) {
+							case sourceTarget is AbstractTile :
+								spatialSource = new SpatialSource(sourceTarget);
+								break;
 							// on est sur un source type cellule
-							spatialSource = new SpatialSource(String(sourceTarget).split("-"));
-						}						
+							case String(sourceTarget).indexOf("-") > -1 :
+								spatialSource = new SpatialSource(String(sourceTarget).split("-"));
+								break;
+						}					
 					}
 					
 					if (spatialSource)
@@ -186,7 +190,13 @@ package ddgame.client.triggers {
 		 * Ref PlayerHelper
 		 */
 		protected function get playerHelper () : PlayerHelper
-		{ return PlayerHelper(facade.getObserver(PlayerHelper.NAME)); }		
+		{ return PlayerHelper(facade.getObserver(PlayerHelper.NAME)); }
+	
+		/**
+		 * Ref IsosceneHelper
+		 */
+		protected function get isosceneHelper () : IsosceneHelper
+		{ return IsosceneHelper(facade.getObserver(IsosceneHelper.NAME)); }
 		
 	}
 
