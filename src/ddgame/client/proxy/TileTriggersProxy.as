@@ -746,7 +746,16 @@ package ddgame.client.proxy {
 
 			// Test de validité
 			if (!isValidTrigger(triggerProps)) return;
-
+			
+			_launchTrigger(triggerProps, sourceObj);
+		}
+		
+		/**
+		 *	Lance l'execution d'un trigger sans tests de validité
+		 * Utile en interne quand test de validité est effectué en amont
+		 */
+		private function _launchTrigger (triggerProps:TriggerProperties, sourceObj:Object = null) : void
+		{
 			var props:TriggerProperties = triggerProps;
 			// Test si trigger est un racourci vers un autre trigger
 			if (triggerProps.symbLinkId != -1)
@@ -813,15 +822,26 @@ package ddgame.client.proxy {
 			var atProps:Array = getTriggerList(id, fireEvtType);
 			if (!atProps) return;
 			
-			var n:int = atProps.length;
-			while (--n > -1) launchTrigger(atProps[n], sourceObj);
+			// Tri des trigger valides à pour une source sur un type d'event cet instant t
+			// pour éviter un confli de type : 2 actions sur un click la première est conditionée sur
+			// la seconde et modifie la condition, la deuxieme est conditionnée sur la premiere et modifie
+			// la condition > résultat : les deux triggers vont se lancer alors que le but rechercher est d'avoir
+			// un flag qui nous permet de lancer soit ll'une, soit l'autre
+			var vatProps:Array = [];
+			for each (var p:TriggerProperties in atProps)
+			{
+				if (isValidTrigger(p)) vatProps.push(p);
+			}
+
+			for each (p in vatProps)
+				launchTrigger(p, sourceObj);
 		}
 		
 		public function launchTriggerByID (id:int, sourceObj:Object = null) : void
 		{
 			var triggerProps:TriggerProperties = TriggerProperties.list[id];
 			if (triggerProps != null)
-				launchTrigger(triggerProps, sourceObj);
+				_launchTrigger(triggerProps, sourceObj);
 		}
 		
 		//--------------------------------------
