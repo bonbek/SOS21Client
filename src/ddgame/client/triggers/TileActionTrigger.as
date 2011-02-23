@@ -134,6 +134,18 @@ package ddgame.client.triggers {
 			}
 		}
 		
+		/**
+		 * Réception timer spécifique au actions son, cas ou un son
+		 * est lancé et on attend pas la fin lecture avant de passer à
+		 * l'action suivante
+		 *	@param event Event
+		 */
+		private function onSoundTrackTimer (event:Event) : void
+		{
+			event.target.removeEventListener("timerComplete", onSoundTrackTimer);
+			onSoundTrackSignal("stop");
+		}
+		
 		//--------------------------------------
 		//  PRIVATE & PROTECTED INSTANCE METHODS
 		//--------------------------------------
@@ -394,8 +406,9 @@ package ddgame.client.triggers {
 							if (!wait) {
 								if (act.d > 0)
 								{
-									setTimer(act.d * 1000);
-									wait = true;
+									var timer:Timer = new Timer(act.d * 1000, 1);
+									timer.addEventListener("timerComplete", onSoundTrackTimer, false, 0, true);
+									timer.start();
 								}
 							}
 							// Attente fin de lecture
