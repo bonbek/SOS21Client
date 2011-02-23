@@ -241,11 +241,11 @@ package ddgame.client.proxy {
 					{
 						// on est sur une variable globale
 						case "g" :
-							value = playerProxy.setGlobalEnv(part.shift(), value);
+							playerProxy.setGlobalEnv(part.shift(), value);
 							break;
 						// on est sur une variable locale
 						case "l" :
-							value = playerProxy.setLocalEnv(part.shift(), value);
+							playerProxy.setLocalEnv(part.shift(), value);
 							break;
 						default :
 							trace(this, "pas params autre que global ou local pour écriture de vars");
