@@ -825,8 +825,8 @@ package ddgame.client.proxy {
 			// Tri des trigger valides à pour une source sur un type d'event cet instant t
 			// pour éviter un confli de type : 2 actions sur un click la première est conditionée sur
 			// la seconde et modifie la condition, la deuxieme est conditionnée sur la premiere et modifie
-			// la condition > résultat : les deux triggers vont se lancer alors que le but rechercher est d'avoir
-			// un flag qui nous permet de lancer soit ll'une, soit l'autre
+			// la condition > résultat : les deux actions vont se lancer alors que le but recherché est d'avoir
+			// un flag qui nous permet de lancer soit l'une, soit l'autre.
 			var vatProps:Array = [];
 			for each (var p:TriggerProperties in atProps)
 			{
