@@ -5,7 +5,8 @@ package ddgame.client.triggers {
 	import com.sos21.events.BaseEvent;
 	import com.sos21.tileengine.core.AbstractTile;
 	import ddgame.sound.SoundTrack;
-	import ddgame.sound.AudioHelper;	
+	import ddgame.sound.AudioHelper;
+	import ddgame.client.events.*;
 	import ddgame.client.proxy.LibProxy;
 	import ddgame.client.view.PlayerHelper;
 	import ddgame.client.view.IsosceneHelper;
@@ -106,6 +107,13 @@ package ddgame.client.triggers {
 						// on définit le volume par defaut
 						soundTrack.volume = volume;
 					}
+					
+					// Triggers pouvant mettre fin à la lecture du son
+					triggerStopingMe = getPropertie("ts");
+					if (triggerStopingMe)
+					{
+						channel.addEventListener(TriggerEvent.COMPLETE, onCheckTriggerStopingMe);
+					}
 				}
 				else {
 					complete();
@@ -119,11 +127,28 @@ package ddgame.client.triggers {
 		
 		private var soundTrack:SoundTrack;
 		private var spatialSource:SpatialSource;
+		private var triggerStopingMe:Array;
 		private var volume:Number = 1;
 
 		//---------------------------------------
 		// EVENT HANDLERS
 		//---------------------------------------
+		
+		/**
+		 * Test des triggers qui stopent la lecture du son
+		 *	@param event TriggerEvent
+		 */
+		private function onCheckTriggerStopingMe (event:TriggerEvent) : void
+		{
+			if (triggerStopingMe)
+			{
+				var tid:int = event.trigger.properties.id;
+				if (triggerStopingMe.indexOf(tid) > -1) soundTrack.stop();
+			}
+			else {
+				channel.removeEventListener(TriggerEvent.COMPLETE, onCheckTriggerStopingMe);
+			}
+		}
 		
 		/**
 		 * Réglage volume si option son spatial
@@ -166,6 +191,10 @@ package ddgame.client.triggers {
 					spatialSource = null;
 					stage.removeEventListener(Event.ENTER_FRAME, onTick);					
 				}
+				// 
+				triggerStopingMe = null;
+				channel.removeEventListener(TriggerEvent.COMPLETE, onCheckTriggerStopingMe);
+
 				complete();
 			}
 		}
