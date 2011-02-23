@@ -826,7 +826,7 @@ package ddgame.client.proxy {
 			// pour éviter un confli de type : 2 actions sur un click la première est conditionée sur
 			// la seconde et modifie la condition, la deuxieme est conditionnée sur la premiere et modifie
 			// la condition > résultat : les deux actions vont se lancer alors que le but recherché est d'avoir
-			// un flag qui nous permet de lancer soit l'une, soit l'autre.
+			// un flag qui nous permet de lancer soit l'une, soit l'autre
 			var vatProps:Array = [];
 			for each (var p:TriggerProperties in atProps)
 			{
