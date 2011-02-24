@@ -298,7 +298,7 @@ package ddgame.client.triggers {
 						var d:int = act.d * 1000;
 						var oc:Boolean = !d ? true : false;
 						var txt:String = act.p.txt;
-						var autoClose:Boolean = false;
+						var autoClose:Boolean = true;
 						// liens
 						if (act.p.l)
 						{
