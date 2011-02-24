@@ -182,6 +182,10 @@ package ddgame.client.triggers {
 				bob.gotoAndStop("stand");
 			}
 
+			if (getPropertie("_fs")) {
+				sendEvent(new Event(EventList.UNFREEZE_SCENE));
+			}
+
 			_canceled = true;
 			sendEvent(new TriggerEvent(TriggerEvent.CANCELED, this));
 		}
@@ -266,7 +270,7 @@ package ddgame.client.triggers {
 			// on test savoir si le tile est déjà à cette place
 			if (!bob.upos.isMatchPos(tpoint))
 			{
-				trace(this, tpoint.posToString(), bob.upos.posToString());
+//				trace(this, tpoint.posToString(), bob.upos.posToString());
 				if (w) {
 					// abonnement clique sur scène annule, pour annuler le déplacement
 					IsosceneHelper(facade.getObserver(IsosceneHelper.NAME)).component.addEventListener (MouseEvent.MOUSE_DOWN, onMoveBob);
@@ -286,6 +290,10 @@ package ddgame.client.triggers {
 		 */
 		protected function complete (event:Event = null) : void
 		{
+			if (getPropertie("_fs")) {
+				sendEvent(new Event(EventList.UNFREEZE_SCENE));
+			}
+
 			sendEvent(new TriggerEvent(TriggerEvent.COMPLETE, this));
 		}
 		
@@ -296,9 +304,14 @@ package ddgame.client.triggers {
 		
 		private function _execute () : void
 		{
-			// TODO un argument _fs "freeze screen" en option native, comme _mb (move bob) ?
 			if (_canceled) return;
 			
+			// on regarde si il faut freezer les interactions souris dans
+			// la scène
+			if (getPropertie("_fs")) {
+				sendEvent(new Event(EventList.FREEZE_SCENE));
+			}
+
 			// on regarde si il faut stopper bob
 			if (getPropertie("_sb"))
 			{
