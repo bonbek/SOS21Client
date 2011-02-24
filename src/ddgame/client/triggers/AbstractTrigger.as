@@ -304,8 +304,7 @@ package ddgame.client.triggers {
 			{
 				var bob:AbstractTile = AbstractTile.getTile("bob");
 				bob.removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
-				bob.stop();
-				bob.gotoAndStop("stand");
+				bob.stop(true);
 			}
 			
 			sendEvent(new TriggerEvent(TriggerEvent.EXECUTE, this));
