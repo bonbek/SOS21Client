@@ -298,6 +298,7 @@ package ddgame.client.triggers {
 						var d:int = act.d * 1000;
 						var oc:Boolean = !d ? true : false;
 						var txt:String = act.p.txt;
+						var autoClose:Boolean = false;
 						// liens
 						if (act.p.l)
 						{
@@ -309,19 +310,31 @@ package ddgame.client.triggers {
 							
 							txt += "\n";
 							txt += la ? pls.join(" ") : pls.join("\n");
+							// on à des liens, check si on attend un clique obligatoire
+							// sur un de ceux-ci avant de passer à la suite.
+							if (getPropertie("_fs") && pls.length > 0) autoClose = false;
 						}
 						if (act.p.s) {
-							pnj.displayThink(txt, d, true, oc, act.p.bw ? act.p.bw : 200);
+							pnj.displayThink(txt, d, autoClose, oc, act.p.bw ? act.p.bw : 200);
 						}
 						else {
-							pnj.displayTalk(txt, d, true, oc, act.p.bw ? act.p.bw : 200);
+							pnj.displayTalk(txt, d, autoClose, oc, act.p.bw ? act.p.bw : 200);
 						}
 
 						if (wait)
 						{
-							if (d > 0) setTimer(d);
-							else // MOUSE_DOWN, car abonnement sur click est trop rapide est catch le MOUSE_UP
-								addWaitListener(MouseEvent.MOUSE_DOWN, stage);
+							if (d > 0) {
+								setTimer(d);
+							} 
+							else {
+								// Ok, on est sur un trigger qui freeze la scène et on fait parler un pnj / avatar
+								// pour lequel on va avoir un choix de réponses. Logiquement ça voudrait dire que :
+								// on veut que le joueur soit obligé de passer par n clique dans un lien du ballon
+								// pnj / avatar
+								if (!autoClose) addWaitListener(EventList.PNJ_BALLONEVENT, channel);
+								else // MOUSE_DOWN, car abonnement sur click est trop rapide est catch le MOUSE_UP
+									addWaitListener(MouseEvent.MOUSE_DOWN, stage);
+							}
 						}
 						
 					}
