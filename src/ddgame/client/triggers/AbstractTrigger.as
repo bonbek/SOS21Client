@@ -49,7 +49,7 @@ package ddgame.client.triggers {
 		//--------------------------------------
 		
 		public static const NAME:String = "tileTrigger";
-		public static const CLASS_ID:int = 0;
+		public static const CLASS_ID:int = -1;
 		
 		/*
 		* type de persistance */

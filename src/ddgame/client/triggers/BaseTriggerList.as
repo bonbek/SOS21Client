@@ -37,6 +37,7 @@ package ddgame.client.triggers {
 		public static function listTriggers():Array /* of Class */
 		{
 			return	[
+							ddgame.client.triggers.EmptyTrigger,						
 							ddgame.client.triggers.ChangeMapTrigger,
 							ddgame.client.triggers.PopupTrigger,
 							ddgame.client.triggers.QuizTrigger,
