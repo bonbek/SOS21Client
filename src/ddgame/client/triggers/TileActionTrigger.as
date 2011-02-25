@@ -160,11 +160,17 @@ package ddgame.client.triggers {
 			// attente fin
 			if (event) removeWaitListener();
 			
+			// Le trigger peut être déjà fini dans le cas ou il y ait plusieurs
+			// actions définis avec des durées non bloquantes, ces actions n'étaient pas encore
+			// finient alors que la pile d'actions à été lue entièrement et que le trigger s'est
+			// terminé.
+			if (!actions) return;
+			
 			// check si reste des actions
 			actionIndex++;
 			if (actionIndex == actions.length)
 			{
-				var lp:int = getPropertie("lp");
+				var lp:int = getPropertie("lp")
 				// check si on à une boucle
 				if (lp > 0)
 				{
@@ -174,7 +180,6 @@ package ddgame.client.triggers {
 						return;						
 					}
 				}
-
 				// on est en boucle, reset de l'index
 				actionIndex = 0;
 			}
@@ -485,6 +490,17 @@ package ddgame.client.triggers {
 				currentTargetListener = null;
 				currentTypeListener = null;
 			}
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function complete (event:Event = null) : void
+		{
+			actions = null;
+			removeWaitListener();
+			timer = null;
+			super.complete();
 		}
 		
 	}
