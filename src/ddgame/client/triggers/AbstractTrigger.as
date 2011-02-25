@@ -178,6 +178,7 @@ package ddgame.client.triggers {
 			{
 				var bob:AbstractTile = AbstractTile.getTile("bob");
 				bob.removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
+				bob.removeEventListener(TileEvent.MOVE_CANCELED, onMoveBob);
 				bob.stop();
 				bob.gotoAndStop("stand");
 			}
@@ -236,6 +237,9 @@ package ddgame.client.triggers {
 				case MouseEvent.MOUSE_DOWN :
 					cancel();
 					break;
+				case TileEvent.MOVE_CANCELED :
+					cancel();
+					break;
 				// fin du déplacement de bob
 				case TileEvent.MOVE_COMPLETE :
 					// abonnement sur bob pour lancer réelement le trigger
@@ -276,6 +280,7 @@ package ddgame.client.triggers {
 					IsosceneHelper(facade.getObserver(IsosceneHelper.NAME)).component.addEventListener (MouseEvent.MOUSE_DOWN, onMoveBob);
 					// abonnement sur bob pour lancer réelement le trigger
 					bob.addEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
+					bob.addEventListener(TileEvent.MOVE_CANCELED, onMoveBob);
 				}
 				sendEvent(new BaseEvent(EventList.MOVE_TILE, {tile:bob, cellTarget:tpoint}));
 				
