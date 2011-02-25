@@ -298,8 +298,8 @@ package ddgame.client.triggers {
 			if (getPropertie("_fs")) {
 				sendEvent(new Event(EventList.UNFREEZE_SCENE));
 			}
-			
-			// Experimentale, ecriture de variables comme option commune
+
+			// Experimental, écriture de variables comme option commune
 			var tw:Array = getPropertie("_wv");
 			if (tw)
 			{
@@ -307,8 +307,23 @@ package ddgame.client.triggers {
 					sendEvent(new BaseEvent(EventList.WRITE_ENV, o));
 			}
 			
+			// Experimental bonus intégrés en options commune
+			var bonus:Object = getPropertie("completeBonus");
+			if (bonus)
+			{
+				for (var p:String in bonus)
+				{
+					lastBonus.theme = bonusMap[p];
+					lastBonus.bonus = bonus[p];
+					sendEvent(new BaseEvent(EventList.ADD_BONUS, lastBonus));
+				}
+			}
+			
 			sendEvent(new TriggerEvent(TriggerEvent.COMPLETE, this));
 		}
+		
+		protected static var lastBonus:Object = {theme:null, bonus:null};
+		protected static var bonusMap:Object = {plev:0, ppir:1, psoc:2, peco:3, penv:4};
 		
 		protected function onDiffer () : void
 		{
