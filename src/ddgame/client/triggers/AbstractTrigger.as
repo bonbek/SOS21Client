@@ -293,7 +293,15 @@ package ddgame.client.triggers {
 			if (getPropertie("_fs")) {
 				sendEvent(new Event(EventList.UNFREEZE_SCENE));
 			}
-
+			
+			// Experimentale, ecriture de variables comme option commune
+			var tw:Array = getPropertie("_wv");
+			if (tw)
+			{
+				for each (var o:Object in tw)
+					sendEvent(new BaseEvent(EventList.WRITE_ENV, o));
+			}
+			
 			sendEvent(new TriggerEvent(TriggerEvent.COMPLETE, this));
 		}
 		
@@ -311,7 +319,7 @@ package ddgame.client.triggers {
 			if (getPropertie("_fs")) {
 				sendEvent(new Event(EventList.FREEZE_SCENE));
 			}
-
+			
 			// on regarde si il faut stopper bob
 			if (getPropertie("_sb"))
 			{
