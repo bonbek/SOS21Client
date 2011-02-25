@@ -559,11 +559,12 @@ package ddgame.client.proxy {
 		{
 			if (!(t is TriggerProperties)) t = TriggerProperties.list[t];
 			if (!t) return false;
+			var cond:Boolean = t.cond ? envProxy.resolve(t.cond) : true;
 			return	t.fireCount < t.maxFireCount
 						&& isValidForCurrentMap(t)
 						&& !t.disable
 						&& (!t.level || t.level == playerProxy.level)
-						&& envProxy.resolve(t.cond);
+						&& cond;
 		}
 		
 		/**
@@ -841,7 +842,7 @@ package ddgame.client.proxy {
 		{
 			var triggerProps:TriggerProperties = TriggerProperties.list[id];
 			if (triggerProps != null)
-				_launchTrigger(triggerProps, sourceObj);
+				launchTrigger(triggerProps, sourceObj);
 		}
 		
 		//--------------------------------------
