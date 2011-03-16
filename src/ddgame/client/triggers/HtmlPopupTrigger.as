@@ -110,16 +110,6 @@ package ddgame.client.triggers {
 					return;
 				}					
 			}
-
-			// on veut un contenu de la DB
-			if (isPropertie("id"))
-			{
-				ApplicationChannel.getInstance().addEventListener(PublicServerEventList.ON_DATACONTENT, dataContentHandler);
-				sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATACONTENT, getPropertie("id")));
-				sendEvent(new Event(EventList.FREEZE_SCENE));
-//				sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, true));
-				return;
-			}
 			
 			complete();
 		}
@@ -128,20 +118,6 @@ package ddgame.client.triggers {
 		//--------------------------------------
 		//  EVENT HANDLERS
 		//--------------------------------------
-				
-		/**
-		 *	Réception des data (contenu texte / html) depuis
-		 *	le remoting
-		 *	recupération du contenu et lancement de l'affichage
-		 */
-		protected function dataContentHandler(event:BaseEvent):void
-		{
-			ApplicationChannel.getInstance().removeEventListener(PublicServerEventList.ON_DATACONTENT, dataContentHandler);
-			setPropertie("text", event.content.body);
-//			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
-			sendEvent(new Event(EventList.UNFREEZE_SCENE));
-			_build();
-		}
 		
 		/**
 		 *	@private

@@ -28,8 +28,6 @@ package ddgame.server.commands {
 			facade.registerCommand(PublicServerEventList.GET_DATAMAP, ddgame.server.commands.GetDataMapCommand, true);
 			facade.registerCommand(PublicServerEventList.GET_DATAQUIZ, ddgame.server.commands.GetDataQuizCommand, true);
 			facade.registerCommand(PublicServerEventList.GET_MAPLIST, ddgame.server.commands.GetMapListCommand, true);
-			facade.registerCommand(PublicServerEventList.GET_DATACONTENT, ddgame.server.commands.GetDataContentCommand, true);
-			facade.registerCommand(PublicServerEventList.SAVE_DATACONTENT, ddgame.server.commands.SaveDataContentCommand, true);
 			
 			// initialisation connection remoting
 			var oconnect:Object = BaseEvent(e).content;

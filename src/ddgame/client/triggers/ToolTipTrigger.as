@@ -8,7 +8,6 @@ package ddgame.client.triggers {
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	import flash.text.StyleSheet;
-	import com.sos21.debug.log;
 	import com.sos21.events.BaseEvent;
 	import ddgame.client.triggers.AbstractTrigger;
 	import com.sos21.tileengine.core.AbstractTile;
@@ -67,13 +66,10 @@ package ddgame.client.triggers {
 		
 		override public function execute(event:Event = null):void
 		{
-			if (isPropertie("text"))
-			{
+			if (isPropertie("text")) {
 				_build();
-			} else if (isPropertie("id")) {
-				ApplicationChannel.getInstance().addEventListener(PublicServerEventList.ON_DATACONTENT, dataContentHandler);
-				sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATACONTENT, getPropertie("id")));								
-			} else {
+			}
+			else {
 				complete();
 				return;
 			}
@@ -104,17 +100,6 @@ package ddgame.client.triggers {
 		//--------------------------------------
 		//  EVENT HANDLERS
 		//--------------------------------------
-		
-		/**
-		 *	Réception des data (contenu texte / html) depuis
-		 *	le remoting
-		 */
-		protected function dataContentHandler(event:BaseEvent):void
-		{
-			ApplicationChannel.getInstance().removeEventListener(PublicServerEventList.ON_DATACONTENT, dataContentHandler);
-			setPropertie("text", event.content.body);
-			if (!_over) _build();
-		}
 		
 		/**
 		 *	Reception des évênements souris du tile
