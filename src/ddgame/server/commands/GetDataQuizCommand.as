@@ -2,11 +2,13 @@
 	Copyright 2008 __MyCompanyName__.
 */
 package ddgame.server.commands {
+
 	import flash.events.Event;
 	import com.sos21.events.BaseEvent;
 	import com.sos21.observer.Notifier;
 	import com.sos21.commands.ICommand;
-	import ddgame.server.proxy.RemotingProxy;
+	import ddgame.proxy.ProxyList;
+	import ddgame.server.IClientServer;
 
 	/**
 	 *	sos21 Command Subclass description.
@@ -26,7 +28,7 @@ package ddgame.server.commands {
 		public function execute (event:Event):void
 		{
 			var nid:int = BaseEvent(event).getInt();
-			RemotingProxy(facade.getProxy(RemotingProxy.NAME)).getDataQuiz(nid);
+			IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).getDataQuiz(nid);
 		}
 				
 	}

@@ -8,9 +8,9 @@ package ddgame.commands {
 	import com.sos21.commands.ICommand;
 	
 	import ddgame.server.events.PublicServerEventList;
-	import ddgame.server.proxy.RemotingProxy;
-	import ddgame.proxy.UserProxy;
 	import ddgame.proxy.ProxyList;
+	import ddgame.server.IClientServer;
+	import ddgame.proxy.UserProxy;
 	import ddgame.view.FirstConnexionHelper;
 		
 	/**
@@ -44,7 +44,7 @@ package ddgame.commands {
 				// passage des datas utilisateur
 				userProxy.setData(userData);
 				
-				var rProxy:RemotingProxy = RemotingProxy(facade.getProxy(RemotingProxy.NAME));
+				var serverProxy:IClientServer = IClientServer(facade.getProxy(ProxyList.SERVER_PROXY));
 								
 				// > utilisateur invité
 				if (userProxy.credentials.login == "guest")
@@ -52,12 +52,12 @@ package ddgame.commands {
 					var so:SharedObject = SharedObject.getLocal("g");
 					if (so.data.id)
 					{
-						rProxy.getPlayerData(so.data.id);
+						serverProxy.getPlayerData(so.data.id);
 						return;
 					}
 					else
 					{
-						rProxy.createPlayer(0);
+						serverProxy.createPlayer(0);
 						return;
 					}
 				}
@@ -67,7 +67,7 @@ package ddgame.commands {
 					if (!userProxy.playerId)
 					{
 						// on lance la création d'un nouveau joueur pour l'utilisateur
-						rProxy.createPlayer(userProxy.userId, null, true);
+						serverProxy.createPlayer(userProxy.userId, null, true);
 					}
 					else
 					{
@@ -89,7 +89,7 @@ package ddgame.commands {
 							}
 						}*/
 
-						rProxy.getPlayerData(userProxy.playerId);
+						serverProxy.getPlayerData(userProxy.playerId);
 					}
 				}
 				

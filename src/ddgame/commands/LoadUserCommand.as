@@ -5,8 +5,8 @@ package ddgame.commands {
 	import com.sos21.observer.Notifier;
 	import com.sos21.commands.ICommand;
 	import ddgame.server.events.PublicServerEventList;
-	import ddgame.server.proxy.RemotingProxy;
 	import ddgame.proxy.ProxyList;
+	import ddgame.server.IClientServer;
 	import ddgame.proxy.UserProxy;
 		
 	/**
@@ -37,7 +37,7 @@ package ddgame.commands {
 			
 			// on lance la recup des data utilisateur
 			// -> retour du résultat lance ddgame.commands.AppStartupCommand
-			RemotingProxy(facade.getProxy(RemotingProxy.NAME)).getUserData(userCredentials.login, userCredentials.password);
+			IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).getUserData(userCredentials.login, userCredentials.password);
 		}
 				
 	}

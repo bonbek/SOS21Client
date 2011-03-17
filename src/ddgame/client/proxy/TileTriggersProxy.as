@@ -16,7 +16,7 @@ package ddgame.client.proxy {
 	import ddgame.client.commands.*;
 	import ddgame.client.triggers.*;
 	import ddgame.client.proxy.*;
-	import ddgame.server.proxy.RemotingProxy;
+	import ddgame.server.IClientServer;
 
 	/**
 	 *	Class description.
@@ -100,9 +100,9 @@ package ddgame.client.proxy {
 			return DatamapProxy(facade.getProxy(DatamapProxy.NAME));
 		}
 
-		public function get remotingProxy () : RemotingProxy
+		public function get serverProxy () : IClientServer
 		{
-			return RemotingProxy(facade.getProxy(RemotingProxy.NAME));
+			return IClientServer(facade.getProxy(ProxyList.SERVER_PROXY));
 		}
 		
 		public function get envProxy () : EnvProxy
@@ -870,7 +870,7 @@ package ddgame.client.proxy {
 					// on lance les overrides
 					writeOverrideTrigger(trigger, 0);
 					// envoie au serveur
-					remotingProxy.triggerExecuted(trigger.properties.persist ? 0 : currentMap, trigger.properties.id);
+					serverProxy.triggerExecuted(trigger.properties.persist ? 0 : currentMap, trigger.properties.id);
 					break;
 				}
 				case TriggerEvent.COMPLETE :

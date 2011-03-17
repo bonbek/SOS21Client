@@ -5,7 +5,7 @@ package ddgame.client.proxy {
 	import flash.net.SharedObject;
 	import com.sos21.events.BaseEvent;
 	import com.sos21.proxy.AbstractProxy;
-	import ddgame.server.proxy.RemotingProxy;	
+	import ddgame.server.IClientServer;
 	import ddgame.events.EventList;
 	import ddgame.vo.ITheme;
 	import ddgame.vo.IBonus;
@@ -201,7 +201,6 @@ package ddgame.client.proxy {
 			if (!evt.isDefaultPrevented())
 			{
 				_bonus[bonus.theme] = opoints;
-//				RemotingProxy(facade.getProxy(RemotingProxy.NAME)).playerBonus({theme:bonus.theme, gain:bonus.gain});
 			}
 			
 			// WIP stockage points dans cookie
@@ -242,7 +241,7 @@ package ddgame.client.proxy {
 			else
 				_data.globals[key] = value;
 
-			RemotingProxy(facade.getProxy(RemotingProxy.NAME)).playerEnv("g", key, value);
+			IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).playerEnv("g", key, value);
 		}
 
 		public function getLocalEnv (key:String) : *
@@ -254,7 +253,7 @@ package ddgame.client.proxy {
 			else
 				_data.locals[key] = value;
 
-			RemotingProxy(facade.getProxy(RemotingProxy.NAME)).playerEnv("l", key, value);
+			IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).playerEnv("l", key, value);
 		}
 		
 		/**

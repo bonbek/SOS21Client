@@ -1,6 +1,3 @@
-/* AS3
-	Copyright 2008 __MyCompanyName__.
-*/
 package {
 	
 	import flash.events.*;
@@ -31,59 +28,24 @@ package {
 	 *
 	 *	@author toffer
 	 */
+	
 	[SWF(width="980", height="576", backgroundColor="#000000", frameRate=25)]
-
 	public class core extends Sprite {
 		
-		/**
-		 *	@Constructor
-		 */
+		//---------------------------------------
+		// CONSTRUCTOR
+		//---------------------------------------
+		
 		public function core ()
 		{
 			super();
-			// addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
 		}
 
 		//---------------------------------------
 		// PRIVATE & PROTECTED INSTANCE VARIABLES
 		//---------------------------------------
-		
+
 		private var _facade:ApplicationFacade;
-		
-//		private var userIds:Object;		// identifiants de l'utilisateur connecté
-		
-		//---------------------------------------
-		// GETTER / SETTERS
-		//---------------------------------------
-		
-		public function setConfig (val:XML):void
-		{
-			// mise à jour du xml de configuration en function des params
-			// passés au swf
-			// >> Effectué depuis le loader.swf
-/*
-			var flashVars:Object = root.loaderInfo.parameters;
-			for (var key:String in flashVars)
-			{
-				if (key == "mapId")
-				{
-					val["maptoload"][0].attribute("force")[0] = 1;
-					val["maptoload"][0] = flashVars[key];
-				}					
-
-				if (key == "entryPoint")
-					val["entryPoint"][0] = flashVars[key];
-
-				if (key == "debug")
-					val["debug"][0] = flashVars[key];
-
-				if (key == "spy")
-					val["spy"][0] = flashVars[key];
-			}
-*/
-			// passage du xml qu proxy configuration
-			ConfigProxy.getInstance().setData(val);
-		}
 		
 		//---------------------------------------
 		// PUBLIC METHODS
@@ -91,17 +53,15 @@ package {
 		
 		/**
 		 * Point de lancement de l'application
-		 *	@param config XML				configuration de l'application
-		 *	@param credentials Object identifiants utilisateur loggé (email et mot de passe encrypté)
+		 *	@param config XML		configuration de l'application
+		 * @param clientServer	module IClientServer
+		 *	@param credentials 	Object identifiants utilisateur loggé (email et mot de passe encrypté)
 		 */
-		public function startup (config:XML, userCredentials:Object = null):void
+		public function startup (config:XML, clientServer:Object, userCredentials:Object = null) : void
 		{
-			setConfig(config);
+			ConfigProxy.getInstance().setData(config);
 			_facade = ApplicationFacade.getInstance();
-			_facade.startup(this, userCredentials ? userCredentials : {login:"guest", password:"35675e68f4b5af7b995d9205ad0fc43842f16450"});
-			
-			// patch editeur
-			dispatchEvent(new Event("applicationInitialized"));
+			_facade.startup(this, clientServer, userCredentials ? userCredentials : {login:"guest", password:"35675e68f4b5af7b995d9205ad0fc43842f16450"});
 		}
 		
 		
@@ -146,29 +106,6 @@ package {
 		}
 		
 		// ----------------------------------
-		
-		//---------------------------------------
-		// EVENT HANDLERS
-		//---------------------------------------
-		
-		private function onConfigLoaded(event:Event):void
-		{
-			event.target.removeEventListener(Event.COMPLETE, onConfigLoaded);			
-			startup(new XML(event.currentTarget.data));
-			// patch editeur
-			dispatchEvent(new Event("applicationInitialized"));
-		}
-		
-		private function addedToStageHandler(event:Event):void
-		{
-			removeEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
-			if (_facade)
-				return;
-			
-			var l:URLLoader = new URLLoader();
-			l.addEventListener(Event.COMPLETE, onConfigLoaded, false, 0, true);
-			l.load(new URLRequest("config.xml"));
-		}
 		
 	}
 	

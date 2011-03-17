@@ -9,7 +9,8 @@ package ddgame.client.commands {
 	import ddgame.client.events.EventList;
 	import ddgame.server.events.PublicServerEventList;
 	import ddgame.client.proxy.PlayerProxy;
-	import ddgame.server.proxy.RemotingProxy;
+	import ddgame.proxy.ProxyList;
+	import ddgame.server.IClientServer;
 	import ddgame.vo.Bonus;
 
 	/**
@@ -38,7 +39,7 @@ package ddgame.client.commands {
 					if (d.bonus is int)
 					{
 						if (d.bonus != 0)
-							RemotingProxy(facade.getProxy(RemotingProxy.NAME)).playerBonus({theme:d.theme, gain:d.bonus});
+							IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).playerBonus({theme:d.theme, gain:d.bonus});
 //							PlayerProxy(facade.getProxy(PlayerProxy.NAME)).addBonus(new Bonus(d.theme, d.bonus));
 						break;						
 					}
@@ -86,28 +87,6 @@ package ddgame.client.commands {
 					break;
 				}
 			}
-			
-			/*var pp:PlayerProxy = PlayerProxy(facade.getProxy(PlayerProxy.NAME));
-
-			var bonus:Bonus = new Bonus(d.theme, d.bonus);
-			pp.addBonus(bonus);
-			// recup du total des point pour le theme
-			var nb:int = pp.getBonus(d.theme).gain;
-			var prop:Object = {};
-			switch (d.theme)
-			{
-				case 2 :
-					prop.b_soc = nb;
-					break;
-				case 3 :
-					prop.b_eco = nb;
-					break
-				case 4 :
-					prop.b_env = nb;
-					break;				
-			}
-			trace(this, nb);
-			RemotingProxy(facade.getProxy(RemotingProxy.NAME)).updatePlayer(pp.id, prop);*/
 		}
 				
 	}

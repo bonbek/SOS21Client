@@ -4,7 +4,7 @@ package ddgame.client.proxy {
 	import com.sos21.utils.Condition;
 	import com.sos21.proxy.AbstractProxy;
 	import ddgame.client.proxy.*;
-	import ddgame.server.proxy.*;
+	import ddgame.server.IClientServer;
 
 	/**
 	 *	Proxy variables environement
@@ -276,13 +276,9 @@ package ddgame.client.proxy {
 		 * Reception de la liste des globals
 		 *	@param e Object
 		 */
-		private function onGlobals (e:Object) : void
+		private function onGlobals (result:Object) : void
 		{
-			remotingProxy.service.removeServiceListener(RemotingProxy.globalsCall, onGlobals);
-			
-			if (e.failed) trace("info", this, "failed");
-			else
-				globals = [null].concat(e.result);
+			globals = [null].concat(result);
 		}
 		
 		//--------------------------------------
@@ -299,8 +295,8 @@ package ddgame.client.proxy {
 		protected function get triggersProxy () : TileTriggersProxy
 		{ return TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)); }
 		
-		protected function get remotingProxy () : RemotingProxy
-		{ return RemotingProxy(facade.getProxy(RemotingProxy.NAME)); }
+		protected function get serverProxy () : IClientServer
+		{ return IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)); }
 		
 		/**
 		 * @inheritDoc
@@ -308,9 +304,7 @@ package ddgame.client.proxy {
 		override public function initialize () : void
 		{
 			// recup des globals
-			var rp:RemotingProxy = remotingProxy;
-			rp.service.addServiceListener(RemotingProxy.globalsCall, onGlobals, false, 0, true);
-			rp.service.callService(RemotingProxy.globalsCall, "list");
+			serverProxy.Globals("list").addOnce(onGlobals)
 		}
 	
 	}

@@ -8,7 +8,6 @@ package ddgame.commands {
 	import com.sos21.commands.ICommand;
 	
 	import ddgame.server.events.PublicServerEventList;
-	import ddgame.server.proxy.RemotingProxy;
 	import ddgame.client.proxy.PlayerProxy;
 	import ddgame.events.EventList;
 	import ddgame.proxy.UserProxy;

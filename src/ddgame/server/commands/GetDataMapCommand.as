@@ -1,10 +1,12 @@
 package ddgame.server.commands {
+
 	import flash.events.Event;
 	import com.sos21.events.BaseEvent;
 	import com.sos21.observer.Notifier;
 	import com.sos21.commands.ICommand;
-	import ddgame.server.proxy.RemotingProxy;
-	import com.sos21.debug.log;
+	import ddgame.proxy.ProxyList;
+	import ddgame.server.IClientServer;
+
 	/**
 	 *	Lance le chargement d'un map data
 	 *
@@ -23,7 +25,7 @@ package ddgame.server.commands {
 		{
 			var o:Object = BaseEvent(event).content;
 			try {
-				RemotingProxy(facade.getProxy(RemotingProxy.NAME)).getDataMap(o.mapId, o.entryPoint, o.removeTriggers);
+				IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).getDataMap(o.mapId, o.entryPoint, o.removeTriggers);
 			} catch (e:Error) {
 				
 			}

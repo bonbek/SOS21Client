@@ -61,9 +61,9 @@ package ddgame {
 		//  PUBLIC METHODS
 		//--------------------------------------
 		
-		public function startup (stage:DisplayObjectContainer,  userCredentials:Object):void
+		public function startup (stage:DisplayObjectContainer, clientServer:Object, userCredentials:Object):void
 		{
-			sendEvent(new BaseEvent(EventList.APPLICATION_INIT, {documentRoot:stage, userCredentials:userCredentials}));
+			sendEvent(new BaseEvent(EventList.APPLICATION_INIT, {documentRoot:stage, clientServer:clientServer, userCredentials:userCredentials}));
 			unregisterCommand(EventList.APPLICATION_INIT);
 		}
 		

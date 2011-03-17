@@ -25,11 +25,11 @@ package ddgame.commands {
 	import ddgame.view.ProgressLogoHelper;
 	import ddgame.view.UIHelper;
 	import ddgame.sound.AudioHelper;
-	
-	import ddgame.server.commands.ServerInitCommand;
-	import ddgame.server.proxy.RemotingProxy;
-	import ddgame.server.events.ServerEventList;
+
+	import ddgame.proxy.ProxyList;
+	import ddgame.server.IClientServer;
 	import ddgame.server.events.PublicServerEventList;
+	import ddgame.server.commands.*;
 	import ddgame.client.view.MapScreenHelper;
 	
 	/**
@@ -78,24 +78,23 @@ package ddgame.commands {
 			// TODO KK
 			var pr:ProgressLogoHelper = new ProgressLogoHelper();
 			facade.registerObserver(ProgressLogoHelper.NAME, pr);
-			
-			// initialization remoting
-			facade.registerCommand(ServerEventList.SERVER_INIT, ddgame.server.commands.ServerInitCommand);
-			var servicePath:String = ConfigProxy.getInstance().getContent("services_path");
-			sendEvent(new BaseEvent(ServerEventList.SERVER_INIT, {servicePath:servicePath}));
-			facade.unregisterCommand(ServerEventList.SERVER_INIT);
-			
-			// on lance la recup des datas utilisateur
+						
+			// initialization clientServer et recup des datas utilisateur
 			var credentials:Object = evtContent.userCredentials;
 			if (credentials)
 			{
-				var rProxy:RemotingProxy = RemotingProxy(facade.getProxy(RemotingProxy.NAME));
-				// passage des autoristations utilisateur au serveur
-				rProxy.setCredentials(credentials.login, credentials.password);
-				// lancement recupération des données utilisateur
-				rProxy.getUserData(credentials.login, credentials.password);
+				// initialization clientServer
+				var serverProxy:Object	= evtContent.clientServer;
+				facade.registerProxy(ProxyList.SERVER_PROXY, serverProxy as IClientServer);
+				serverProxy.connect(credentials);
 				
-//				var mdebbug:MonsterDebugger = new MonsterDebugger(evtContent.documentRoot.stage);
+				// on enregistre les commandes serveur
+				facade.registerCommand(PublicServerEventList.GET_DATAMAP, ddgame.server.commands.GetDataMapCommand, true);
+				facade.registerCommand(PublicServerEventList.GET_DATAQUIZ, ddgame.server.commands.GetDataQuizCommand, true);
+				facade.registerCommand(PublicServerEventList.GET_MAPLIST, ddgame.server.commands.GetMapListCommand, true);
+
+				// lancement recupération des données utilisateur
+				serverProxy.getUserData(credentials.login, credentials.password);
 				
 				if (ConfigProxy.getInstance().getContent("debug") == "true")
 				{
