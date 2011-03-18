@@ -77,7 +77,7 @@ package ddgame.proxy {
 			
 				furl = aspath + String(o.assets[0]);
 
-				if (o.pnj)
+				if (int(o.pnj) > 0)
 				{
 					var cl:Class = lib.lib.getClassFrom(furl, o.title);				
 					var mc:MovieClip = new cl();					

@@ -152,7 +152,7 @@ package ddgame.scene {
 //					t.mouseEnabled = false;
 				}
 				
-				if (t.data.pnj)
+				if (int(t.data.pnj) > 0)
 				{
 					facade.registerObserver(t.ID, new PNJHelper(t.ID, t))
 				}
