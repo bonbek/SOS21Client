@@ -10,7 +10,7 @@ package ddgame {
 	import com.sos21.events.EventChannel;
 	import com.sos21.events.BaseEvent;
 	import ddgame.events.EventList;
-	import ddgame.server.events.PublicServerEventList;
+	import ddgame.events.ServerEventList;
 	import ddgame.commands.*;
 	
 	/*
@@ -80,9 +80,9 @@ package ddgame {
 			registerCommand(EventList.APPLICATION_INIT, ddgame.commands.AppInitCommand);
 			registerCommand(EventList.APPLICATION_STARTUP, ddgame.commands.AppStartupCommand);
 			registerCommand(EventList.REFRESH_USER, ddgame.commands.LoadUserCommand);
-			registerCommand(PublicServerEventList.ON_USER_LOADED, ddgame.commands.UserInitCommand);
-			registerCommand(PublicServerEventList.ON_PLAYER_CREATED, ddgame.commands.PlayerInitCommand);
-			registerCommand(PublicServerEventList.ON_PLAYER_LOADED, ddgame.commands.PlayerInitCommand);
+			registerCommand(ServerEventList.ON_USER_LOADED, ddgame.commands.UserInitCommand);
+			registerCommand(ServerEventList.ON_PLAYER_CREATED, ddgame.commands.PlayerInitCommand);
+			registerCommand(ServerEventList.ON_PLAYER_LOADED, ddgame.commands.PlayerInitCommand);
       }
 		
 	}

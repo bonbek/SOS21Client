@@ -6,14 +6,14 @@ package ddgame.commands {
 	import com.sos21.commands.ICommand;
 	import com.sos21.proxy.ConfigProxy;
 	import ddgame.events.EventList;
-	import ddgame.client.events.EventList;
-	import ddgame.client.commands.IsoworldInitCommand;
-	import ddgame.server.events.PublicServerEventList;
-	import ddgame.client.proxy.PlayerProxy;
-	import ddgame.view.FirstConnexionHelper;
+	import ddgame.events.EventList;
+	import ddgame.commands.IsoworldInitCommand;
+	import ddgame.events.ServerEventList;
+	import ddgame.proxy.PlayerProxy;
+	import ddgame.ui.FirstConnexionHelper;
 	import ddgame.proxy.ProxyList;
 	import ddgame.proxy.UserProxy;
-	import ddgame.client.proxy.TileTriggersProxy;
+	import ddgame.proxy.TileTriggersProxy;
 	
 	/**
 	 *	Commande démarrage, switch sur module première connexion utilsateur
@@ -33,9 +33,9 @@ package ddgame.commands {
       public function execute (event:Event):void
 		{
 			// initialiation de la partie client (jeu)
-			facade.registerCommand(ddgame.client.events.EventList.ISOWORLD_INIT, ddgame.client.commands.IsoworldInitCommand, true);
-			sendPublicEvent(new BaseEvent(ddgame.client.events.EventList.ISOWORLD_INIT));
-			facade.unregisterCommand(ddgame.client.events.EventList.ISOWORLD_INIT);
+			facade.registerCommand(ddgame.events.EventList.ISOWORLD_INIT, ddgame.commands.IsoworldInitCommand, true);
+			sendPublicEvent(new BaseEvent(ddgame.events.EventList.ISOWORLD_INIT));
+			facade.unregisterCommand(ddgame.events.EventList.ISOWORLD_INIT);
 			
 			sendPublicEvent(new Event("appReady"));
 				
@@ -67,14 +67,14 @@ package ddgame.commands {
 			//TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)).cookie = playerProxy.cookie;
 			
 			// chargement map 0 (triggers Globaux)
-			sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATAMAP, {mapId:0}));
+			sendPublicEvent(new BaseEvent(ServerEventList.GET_DATAMAP, {mapId:0}));
 			
-			sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATAMAP, {mapId:entryMap}));
+			sendPublicEvent(new BaseEvent(ServerEventList.GET_DATAMAP, {mapId:entryMap}));
 			
 			// nettoyage des commandes à ne plus utiliser
 			facade.unregisterCommand(ddgame.events.EventList.APPLICATION_INIT);
 			facade.unregisterCommand(ddgame.events.EventList.APPLICATION_STARTUP);
-			facade.unregisterCommand(PublicServerEventList.ON_USER_LOADED);
+			facade.unregisterCommand(ServerEventList.ON_USER_LOADED);
 		}
 	}
 	

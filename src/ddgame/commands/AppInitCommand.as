@@ -16,21 +16,20 @@ package ddgame.commands {
 
 	import ddgame.events.EventList;
 
-//	import ddgame.client.events.EventList; 
-	import ddgame.client.view.HelperList;
+	import ddgame.helper.HelperList;
 	import ddgame.commands.OpenMapScreenCommand;
 
 	import ddgame.proxy.ProxyList;
 	import ddgame.proxy.UserProxy;
-	import ddgame.view.ProgressLogoHelper;
-	import ddgame.view.UIHelper;
+	import ddgame.ui.ProgressLogoHelper;
+	import ddgame.ui.UIHelper;
 	import ddgame.sound.AudioHelper;
 
 	import ddgame.proxy.ProxyList;
 	import ddgame.server.IClientServer;
-	import ddgame.server.events.PublicServerEventList;
-	import ddgame.server.commands.*;
-	import ddgame.client.view.MapScreenHelper;
+	import ddgame.events.ServerEventList;
+	import ddgame.commands.*;
+	import ddgame.ui.MapScreenHelper;
 	
 	/**
 	 *	Commande initialisation de l'appli, effectue
@@ -89,9 +88,9 @@ package ddgame.commands {
 				serverProxy.connect(credentials);
 				
 				// on enregistre les commandes serveur
-				facade.registerCommand(PublicServerEventList.GET_DATAMAP, ddgame.server.commands.GetDataMapCommand, true);
-				facade.registerCommand(PublicServerEventList.GET_DATAQUIZ, ddgame.server.commands.GetDataQuizCommand, true);
-				facade.registerCommand(PublicServerEventList.GET_MAPLIST, ddgame.server.commands.GetMapListCommand, true);
+				facade.registerCommand(ServerEventList.GET_DATAMAP, ddgame.commands.GetDataMapCommand, true);
+				facade.registerCommand(ServerEventList.GET_DATAQUIZ, ddgame.commands.GetDataQuizCommand, true);
+				facade.registerCommand(ServerEventList.GET_MAPLIST, ddgame.commands.GetMapListCommand, true);
 
 				// lancement recupération des données utilisateur
 				serverProxy.getUserData(credentials.login, credentials.password);

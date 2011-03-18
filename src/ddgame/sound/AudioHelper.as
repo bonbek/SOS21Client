@@ -7,8 +7,8 @@ package ddgame.sound {
 	import com.sos21.helper.AbstractHelper;
 	import com.sos21.events.BaseEvent;
 	
-	import ddgame.client.proxy.DatamapProxy;
-	import ddgame.client.events.EventList;
+	import ddgame.proxy.DatamapProxy;
+	import ddgame.events.EventList;
 	import ddgame.helper.HelperList;
 	import ddgame.sound.MultiTrackSound;
 	import ddgame.sound.SoundTrack;
@@ -287,7 +287,7 @@ package ddgame.sound {
 		{
 			switch(event.type)
 			{
-				case ddgame.client.events.EventList.DATAMAP_PARSED :
+				case ddgame.events.EventList.DATAMAP_PARSED :
 				{
 					var url:String = datamap.ambientSoundFile;
 					if (url)
@@ -297,7 +297,7 @@ package ddgame.sound {
 					}
 					break;
 				}
-				case ddgame.client.events.EventList.CLEAR_MAP :
+				case ddgame.events.EventList.CLEAR_MAP :
 				{
 					stopMusic();
 					stopAllSounds();
@@ -328,8 +328,8 @@ package ddgame.sound {
 		 */
 		override protected function listInterest () : Array
 		{
-			return [	ddgame.client.events.EventList.DATAMAP_PARSED,
-						ddgame.client.events.EventList.CLEAR_MAP ];
+			return [	ddgame.events.EventList.DATAMAP_PARSED,
+						ddgame.events.EventList.CLEAR_MAP ];
 		}
 
 	}

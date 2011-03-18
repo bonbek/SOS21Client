@@ -7,13 +7,13 @@ package ddgame.commands {
 	import com.sos21.observer.Notifier;
 	import com.sos21.commands.ICommand;
 	
-	import ddgame.server.events.PublicServerEventList;
-	import ddgame.client.proxy.PlayerProxy;
+	import ddgame.events.ServerEventList;
+	import ddgame.proxy.PlayerProxy;
 	import ddgame.events.EventList;
 	import ddgame.proxy.UserProxy;
 	import ddgame.proxy.ProxyList;
-	import ddgame.view.UIHelper;
-	import ddgame.view.FirstConnexionHelper;
+	import ddgame.ui.UIHelper;
+	import ddgame.ui.FirstConnexionHelper;
 		
 	/**
 	 *	Commande initialisation d'un joueur
@@ -69,7 +69,7 @@ package ddgame.commands {
 						{
 							// > un player à été crée pour un utilisteur ayant déjà un pseudo
 							// (utilsateur à dejà fini le jeu :))
-							case PublicServerEventList.ON_PLAYER_CREATED :
+							case ServerEventList.ON_PLAYER_CREATED :
 							{
 								if (userProxy.username)
 								{
@@ -79,7 +79,7 @@ package ddgame.commands {
 								break;
 							}
 							// > les vérifs on été faites, le joueur reflète l'utilisateur connecté
-							case PublicServerEventList.ON_PLAYER_LOADED :
+							case ServerEventList.ON_PLAYER_LOADED :
 							{
 								// suppression éventuelle du module première connection
 								if (facade.getObserver(FirstConnexionHelper.NAME))

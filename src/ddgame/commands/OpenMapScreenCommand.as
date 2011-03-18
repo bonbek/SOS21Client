@@ -3,7 +3,7 @@ package ddgame.commands {
 	import com.sos21.events.BaseEvent;
 	import com.sos21.observer.Notifier;
 	import com.sos21.commands.ICommand;
-	import ddgame.client.view.MapScreenHelper;
+	import ddgame.ui.MapScreenHelper;
 	import flash.events.Event;
 
 	/**

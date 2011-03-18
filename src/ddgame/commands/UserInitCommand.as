@@ -7,11 +7,11 @@ package ddgame.commands {
 	import com.sos21.observer.Notifier;
 	import com.sos21.commands.ICommand;
 	
-	import ddgame.server.events.PublicServerEventList;
+	import ddgame.events.ServerEventList;
 	import ddgame.proxy.ProxyList;
 	import ddgame.server.IClientServer;
 	import ddgame.proxy.UserProxy;
-	import ddgame.view.FirstConnexionHelper;
+	import ddgame.ui.FirstConnexionHelper;
 		
 	/**
 	 *	Commande initialisation d'un utilsateur / joueur
