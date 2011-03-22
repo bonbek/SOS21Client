@@ -311,7 +311,7 @@ package ddgame.triggers {
 		 */
 		public function get hasChainedTrigger () : Boolean
 		{
-			var a:Array = _arguments["onComplete"];
+			var a:Object = _arguments["onComplete"];
 			if (!a) {
 				return false;
 			} else {
