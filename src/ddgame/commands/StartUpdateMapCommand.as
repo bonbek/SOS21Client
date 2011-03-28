@@ -123,7 +123,7 @@ package ddgame.commands {
 			while (--n > -1)
 			{
 				dtile = tlist[n];
-				if (dtile.pnj || dtile.sheet)
+				if (int(dtile.pnj) > 0 || dtile.sheet)
 				{
 					libProxy.createLoader(libProxy.tilesPath + dtile.assets[0]);
 				}
@@ -133,11 +133,7 @@ package ddgame.commands {
 					while (--nasset > -1)
 					{
 						asseturl = dtile.assets[nasset];
-						// Patch mur ou objet plat
-//						if ((dtile.width < .1 && dtile.depth > .1) || dtile.height < .1 || (dtile.depth < .1 && dtile.width > 1))
-//							libProxy.addTileAssetLoader(asseturl, false);
-//						else
-							libProxy.addTileAssetLoader(asseturl);
+						libProxy.addTileAssetLoader(asseturl);
 					}
 				}
 			}
