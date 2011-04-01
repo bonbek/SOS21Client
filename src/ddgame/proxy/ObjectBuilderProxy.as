@@ -1,5 +1,6 @@
 package ddgame.proxy {
 	
+	import com.sos21.events.BaseEvent;
 	import com.sos21.proxy.AbstractProxy;
 
 	import flash.display.DisplayObject;
@@ -110,6 +111,14 @@ package ddgame.proxy {
 		{
 			return new CollisionCell(val, cost);
 		}
+		
+		/**
+		 *	@param type String
+		 *	@param data Object
+		 *	@return BaseEvent
+		 */
+		public function createBaseEvent (type:String, data:Object) : BaseEvent
+		{ return new BaseEvent(type, data); }
 		
 	}
 
