@@ -52,15 +52,11 @@ package ddgame.proxy {
 		private var tileFactoryProxy:TileFactoryProxy;
 		private var tileTriggersProxy:TileTriggersProxy;
 		private var collisionGridProxy:CollisionGridProxy;
+		public var externalTriggers:Array;
 		
 		//--------------------------------------
 		//  GETTER/SETTERS
 		//--------------------------------------
-		
-		public function get externalTriggers():Array
-		{
-			return _data.externalTriggers;
-		}
 		
 		public function get collisionGrid():TypedGrid
 		{

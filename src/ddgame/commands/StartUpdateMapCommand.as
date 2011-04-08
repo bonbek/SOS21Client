@@ -53,7 +53,8 @@ package ddgame.commands {
 			var n2:int;
 			var dtrigger:Object;
 			var ftrigger:String;
-			o.externalTriggers = [];	// on crée la liste des triggers externes dans le datamap
+			// Liste des trigger externes (modules)
+			var externalTriggers:Array = [];
 			while (--n > -1)
 			{
 				dtrigger = tlist[n];
@@ -69,18 +70,22 @@ package ddgame.commands {
 						}
 					}
 					
-					ftrigger = triggerList.trigger.(@id == dtrigger.classId).@url;
-					if (o.externalTriggers.indexOf(dtrigger.classId) > -1)
+					// Test si le trigger est déjà dans la liste
+					if (externalTriggers.indexOf(dtrigger.classId) > -1)
 						continue;
+					
+					ftrigger = triggerList.trigger.(@id == dtrigger.classId).@url;					
 					if (ftrigger && !trigLocator.isRegisteredId(dtrigger.classId))
 					{
 						// on place le trigger externe en chargement
 						libProxy.createLoader(ftrigger);					
 						// on stock son id ref dans le datamap
-						o.externalTriggers.push(dtrigger.classId);
+						externalTriggers.push(dtrigger.classId);
 					}
 				}
 			}
+			// Stockage dans dataMapProxy
+			dataMapProxy.externalTriggers = externalTriggers;
 			
 			// > patch preload des assets sur les arguments remplacé de trigger
 			var replaceArgList:Array = triggerProxy.getSpecMapReplaceTriggerArgs(o.id)
