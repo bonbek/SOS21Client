@@ -237,16 +237,16 @@ package ddgame.ui {
 						switch (b.theme)
 						{
 							case 1 :
-								dt["gauge" + b.theme] = "piraniak  " + b.gain + "/10";
+								dt["gauge" + b.theme] = cfdt.themes.theme.(@id == 1).title + "  " + b.gain + "/10";
 								break;
 							case 2 :
-								dt["gauge" + b.theme] = "social  " + b.gain + "/100";
+								dt["gauge" + b.theme] = cfdt.themes.theme.(@id == 2).title + "  " + b.gain + "/100";
 								break;
 							case 3 :
-								dt["gauge" + b.theme] = b.gain + "/100  économie";
+								dt["gauge" + b.theme] = b.gain + "/100  " + cfdt.themes.theme.(@id == 3).title;
 								break;
 							case 4 :
-								dt["gauge" + b.theme] = b.gain + "/100  environnement";
+								dt["gauge" + b.theme] = b.gain + "/100  " + cfdt.themes.theme.(@id == 4).title;
 								break;
 						}
 //						dt["gauge" + b.theme] = b.gain;
