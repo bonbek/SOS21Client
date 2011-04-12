@@ -24,11 +24,8 @@ package ddgame.commands {
 		public function execute(event:Event):void
 		{
 			var o:Object = BaseEvent(event).content;
-			try {
-				IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).getDataMap(o.mapId, o.entryPoint, o.removeTriggers);
-			} catch (e:Error) {
-				
-			}
+			trace("Info: Load data map ", o.mapId, this);
+			IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).getDataMap(o.mapId, o.entryPoint, o.removeTriggers);
 		}
 		
 	}

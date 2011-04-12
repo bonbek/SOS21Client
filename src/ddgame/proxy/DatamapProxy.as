@@ -59,91 +59,70 @@ package ddgame.proxy {
 		//--------------------------------------
 		
 		public function get collisionGrid():TypedGrid
-		{
-			return collisionGridProxy.grid;
-		}
+		{ return collisionGridProxy.grid; }
 		
 		public function get tileList():Array
-		{
-			return _data.tileList;
-		}
+		{ return _data.objects; }
 		
 		public function get title():String
-		{
-			return _data.title;
-		}
+		{ return _data.title; }
 		
-		public function get ambientSoundFile():String {
-			return _data.ambientSound;
-		}
+		public function get ambientSoundFile():String
+		{ return _data.music; }
 		
-		public function get foregroundFile():String {
-			return _data.foregroundFile;
-		}
+		public function get foregroundFile () : String
+		{ return _data.foreground; }
 		
-		public function get backgroundFile():String {
-			return _data.backgroundFile;
-		}
+		public function get backgroundFile ():String
+		{ return _data.background; }
 		
-		public function get entryPoint():UPoint {
-			return _entryPoint;
-		}
+		public function get entryPoint () : UPoint
+		{ return _entryPoint; }
 				
-		public function get dimx():int {
-			return _data.dimx;
-		}
+		public function get dimx () : int
+		{ return _data.cellsNumber.x; }
 		
-		public function get dimy():int {
-			return _data.dimy;
-		}
+		public function get dimy () :int
+		{ return _data.cellsNumber.y; }
 		
-		public function get dimz():int {
-			return _data.dimz;
-		}
+		public function get dimz () : int
+		{ return _data.cellsNumber.z; }
 		
-		public function get tilew():int {
-			return _data.tilew;
-		}
+		public function get tilew () : int
+		{ return _data.cellsSize.width; }
 		
-		public function get tileh():int {
-			return _data.tileh;
-		}
+		public function get tileh () : int
+		{ return _data.cellsSize.height; }
 		
-		public function get tiled():int {
-			return _data.tileh;
-		}
+		public function get tiled () : int
+		{ return _data.cellsSize.depth; }
 		
-		public function get sceneOffsetX () : Number {
-			return ("sceneOffsetX" in _data) ? _data.sceneOffsetX : 0;
-		}
+		public function get sceneOffsetX () : int
+		{ return _data.camera.xOffset; }
 		
-		public function get sceneOffsetY () : Number {
-			return ("sceneOffsetY" in _data) ? _data.sceneOffsetY : 0;
-		}
+		public function get sceneOffsetY () : int
+		{ return _data.camera.yOffset; }
 		
-		public function get avatarFactor():Number {
-			return _data.avatarFactor;
-		}
+		public function get avatarFactor () : Number
+		{ return _data.scaleFactor; }
 		
-		public function get enableNoMouseEventInAlpha():Boolean {
-			if (_data.hasOwnProperty("enableNoMouseEventInAlpha"))
-				return _data.enableNoMouseEventInAlpha;
-			
-			return true;
-		}
+		public function get enableNoMouseEventInAlpha () : Boolean
+		{ return true; }
 		
-		public function get location () : Object {
-			return ("location" in _data) ? _data.location : {adress:"",lat:0,lon:0};
+		public function get location () : Object
+		{
+			return _data.location	? _data.location
+											: {adress:"",lat:0, lon:0};
 		}
 		
 		public function get env () : Array
-		{ return ("env" in _data) ? _data.env : []; }
+		{ return _data.variables ? _data.variables : []; }
 		
-		public function set data (value:Object):void {
+		public function set data (value:Object):void
+		{
 			if (_data)
-			{
 				_lastMapId = _data.id;
-			}
+
 			_data = value;
 		}
 		
@@ -151,18 +130,14 @@ package ddgame.proxy {
 		 * Retourne l'identifiant de la map
 		 */
 		public function get mapId ():int
-		{
-			return _data.id;
-		}
+		{ return _data.id; }
 		
 		/**
 		 * Retourne l'identifiant de la dernière map
 		 * visitée
 		 */
 		public function get lastMapId ():int
-		{
-			return _lastMapId;
-		}
+		{ return _lastMapId; }
 		
 		//--------------------------------------
 		//  PUBLIC METHODS
@@ -176,13 +151,13 @@ package ddgame.proxy {
 			collisionGridProxy.resetGrid(dimx, dimy, dimz);
 			
 			// désérialisation des triggers
-			tileTriggersProxy.parse(_data.triggers);
+			tileTriggersProxy.parse(_data.actions);
 
 			collisionGridProxy.parse(_data.collisions);
 			
 			tileFactoryProxy.clear();
 			tileFactoryProxy.tileDims = new UPoint (0, 0, 0, tilew, tileh, tiled);
-			tileFactoryProxy.parseTileList(_data.tileList);
+			tileFactoryProxy.parseTileList(_data.objects);
 			
 			sendEvent(new Event(EventList.DATAMAP_PARSED));
 		}
@@ -200,7 +175,7 @@ package ddgame.proxy {
 		*/
 		private function parseEntryPoint():void
 		{
-			var p:Object = _data.entryPoint;
+			var p:Object = _data.entrance;
 			_entryPoint = new UPoint(p.x, p.y, p.z);
 		}
 		

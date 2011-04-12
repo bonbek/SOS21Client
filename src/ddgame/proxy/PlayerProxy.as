@@ -49,8 +49,10 @@ package ddgame.proxy {
 		
 		// liste des points
 		protected var _bonus:Array = [];
-		
+		protected var _currentPlace:int;
+		protected var _lastPlace:int;
 		protected var _username:String;
+		protected var _locals:Object;
 
 		//--------------------------------------
 		//  GETTER/SETTERS
@@ -145,7 +147,7 @@ package ddgame.proxy {
 		 */
 		public function get lastVisitedMapId () : int
 		{
-			return 0;
+			return _lastPlace;
 		}
 		
 		/**
@@ -245,15 +247,26 @@ package ddgame.proxy {
 		}
 
 		public function getLocalEnv (key:String) : *
-		{  return _data.locals[key]; }
+		{  return _locals[key]; }
 
 		public function setLocalEnv (key:String, value:*) : void
 		{
-			if (value == "_|DEL|_") delete _data.locals[key];
+			if (value == "_|DEL|_") delete _locals[key];
 			else
-				_data.locals[key] = value;
+				_locals[key] = value;
 
 			IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).playerEnv("l", key, value);
+		}
+		
+		
+		public function setPlace (id:int) : void
+		{
+			_lastPlace = _currentPlace;
+			_currentPlace = id;
+
+			var scope:String = String(_currentPlace);
+			_locals = _data.locals[scope];
+			if (!_locals) _data.locals[scope] = _locals = {};
 		}
 		
 		/**

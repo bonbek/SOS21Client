@@ -41,40 +41,7 @@ package ddgame.commands {
 			var trigProxy:TileTriggersProxy = TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME));
 			trigProxy.removeCurrentMapTriggers();
 			trigProxy.triggersEnabled = false;
-			
-			// -> patch injection de propriétées triggers
-			if (o.injectTP)
-			{
-				var aitp:Array = o.injectTP;
-				for (var i:int = 0; i < aitp.length; i++)
-					trace(this, "INJECT trigger ", aitp[i].id);
-			}
-			
-			// WIP TEST cookie
-			/*trace(this, '------- TEST COOKIE ---------');
-			var cookie:Object = PlayerProxy(facade.getProxy(PlayerProxy.NAME)).cookie;
-			if (cookie.data.hasOwnProperty("triggers"))
-			{
-				for each (var t:Object in cookie.data.triggers)
-				{
-					trace("> trigger", t);
-					for (var p:String in t)
-						trace(p, t[p]);
-				}			
-			}
-			if (cookie.data.hasOwnProperty("bonus"))
-			{
-				trace("bonus ",  cookie.data.bonus.length);
-				for each (var b:Object in cookie.data.bonus)
-				{
-					trace("> bonus", b);
-					for (p in b)
-						trace(p, b[p]);
-				}				
-			}
-			trace(this, '------------------------------');*/
-			
-//			sendPublicEvent(new BaseEvent(ServerEventList.GET_MAPLIST));
+						
 			sendPublicEvent(new BaseEvent(ServerEventList.GET_DATAMAP, o));
 		}
 				

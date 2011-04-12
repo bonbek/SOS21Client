@@ -61,10 +61,14 @@ package ddgame.commands {
 				}
 			
 				// mise à jour variables locales joueur
-				PlayerProxy(facade.getProxy(PlayerProxy.NAME)).getData().locals = dmProxy.getData().playerLocals;
+//				PlayerProxy(facade.getProxy(PlayerProxy.NAME)).getData().locals = dmProxy.getData().playerLocals;
+				PlayerProxy(facade.getProxy(PlayerProxy.NAME)).setPlace(dmProxy.mapId);
 				// lance la construction
 				dmProxy.parseData();
 				
+				
+				trace("Info: map ", dmProxy.mapId, "updated", this);
+
 				// mise à jour du cookie
 	//			var cookie:Object = PlayerProxy(facade.getProxy(PlayerProxy.NAME)).cookie;
 	//			cookie.data.map = dmProxy.mapId;

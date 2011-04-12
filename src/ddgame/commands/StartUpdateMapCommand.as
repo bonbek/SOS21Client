@@ -31,18 +31,20 @@ package ddgame.commands {
 			// objet data map
 			var o:Object = BaseEvent(event).content;
 			
-			trace("info", this, " Start update Lib");
+			trace("Info: Start update map ", o.id, this);
 			// on prépare la librairie
 			var libProxy:LibProxy = LibProxy(facade.getProxy(LibProxy.NAME));
 			libProxy.clear();
 			
 			var dataMapProxy:DatamapProxy = DatamapProxy(facade.getProxy(DatamapProxy.NAME));
+			
 			// ------> triggers externes
 			var triggerProxy:TileTriggersProxy = facade.getProxy(TileTriggersProxy.NAME) as TileTriggersProxy;
 			var trigLocator:TriggerLocator = TriggerLocator.getInstance();
 			var triggerList:XMLList = ConfigProxy.getInstance().data.triggers;
+			
 			// on recup la liste des triggers de la map et on teste ceux à loader
-			var tlist:Array = o.triggers;
+			var tlist:Array = o.actions;
 			// > patch recup des triggers injectées depuis autres map sur la map courante
 			var injectTList:Array = triggerProxy.getSpecMapTriggers(o.id);
 			if (injectTList)
@@ -112,7 +114,7 @@ package ddgame.commands {
 			if (o.id == 0)
 			{
 				dataMapProxy.data = o;
-				triggerProxy.parse(o.triggers);
+				triggerProxy.parse(o.actions);
 				dataMapProxy.data = null;
 				return;
 			}
@@ -120,7 +122,7 @@ package ddgame.commands {
 			
 			// ------> assets
 			// liste des tiles
-			tlist = o.tileList;	// liste des datas tiles			
+			tlist = o.objects;	// liste des datas tiles			
 			n = tlist.length;
 			var dtile:Object;		// data tile
 			var nasset:int;		// nombre d'assets du tiles
@@ -144,11 +146,11 @@ package ddgame.commands {
 			}
 			
 			
-			if(o.foregroundFile)
-				libProxy.createLoader(libProxy.layersPath + o.foregroundFile);
+			if(o.foreground)
+				libProxy.createLoader(libProxy.layersPath + o.foreground);
 			
-			if (o.backgroundFile)
-				libProxy.createLoader(libProxy.layersPath + o.backgroundFile, true);
+			if (o.background)
+				libProxy.createLoader(libProxy.layersPath + o.background, true);
 			
 			// TODO à charger une seule fois (premiere map ?)
 			libProxy.createLoader(libProxy.spritesPath + "AvatarSkins.swf");

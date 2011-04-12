@@ -25,9 +25,9 @@ package ddgame.commands {
 		//  PUBLIC METHODS
 		//--------------------------------------
 		
-		public function execute (event:Event):void
+		public function execute (event:Event) : void
 		{
-			var nid:int = BaseEvent(event).getInt();
+			var nid:int = BaseEvent(event).content;
 			IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).getDataQuiz(nid);
 		}
 				
