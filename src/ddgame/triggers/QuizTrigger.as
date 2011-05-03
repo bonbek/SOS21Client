@@ -81,22 +81,23 @@ package ddgame.triggers {
 		/**
 		 *	@inheritDoc
 		 */
-		override public function execute(event:Event = null):void
+		override public function execute (event:Event = null) : void
 		{
-			if (!event) // First call, store data quiz id
+			if (!event)
 			{
 				// liste des qcm
 				_queue = String(properties.arguments["id"]).split("#");
 				if (isPropertie("mode") && _queue.length > 0)
 				{
+					// mode de tirage
 					var qmode:int = getPropertie("mode");
 
-					if (qmode & 1)		// ne pas réjouer qcm's déjà joués
-					{
+					// ne pas réjouer qcm's déjà joués
+					if (qmode & 1)
 						removePlayedFromQueue();
-					}
 
-					if (qmode & 2)		// mode aléatoire
+					// mode tirage aléatoire un dans la liste
+					if (qmode & 2)
 					{
 						var n:int = _queue.length;
 						if (n > 1)
@@ -107,11 +108,12 @@ package ddgame.triggers {
 			
 			if (_queue.length > 0)
 			{
-//				sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, true));
 				sendEvent(new Event(EventList.FREEZE_SCENE));
 				callForData();
-			} else {
-				_release();				
+			}
+			else
+			{
+				_release();	
 			}
 			
 		}
@@ -119,7 +121,7 @@ package ddgame.triggers {
 		/**
 		 *	Supprime les qcm déjà joués de la liste d'attente des qcm
 		 */
-		public function removePlayedFromQueue():void
+		public function removePlayedFromQueue () : void
 		{
 			var l:int = played.length;
 			var ind:int;
@@ -138,7 +140,7 @@ package ddgame.triggers {
 		/*
 		*	Data event handler
 		*/
-		private function dataQuizHandler(event:BaseEvent):void
+		private function dataQuizHandler (event:BaseEvent) : void
 		{
 //			trace("data received");
 //			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
@@ -247,18 +249,39 @@ package ddgame.triggers {
 		private function callForData():void
 		{
 			var quizId:int = _queue.shift();
-			trace("QUIZ ", quizId);
 			if (quizId > 0)
 			{
-				ApplicationChannel.getInstance().addEventListener(ServerEventList.ON_DATAQUIZ, dataQuizHandler);
-				sendPublicEvent(new BaseEvent(ServerEventList.GET_DATAQUIZ, quizId));
+				// Patch de transition avant que tous les quiz soient
+				// passés dans les data triggers
+				if (isPropertie("qzl"))
+				{
+					for each (data in getPropertie("qzl"))
+					{
+						if (data.id == quizId)
+						{
+							if (_quiz == null)
+								_initDisplay();
+
+							// on construit le qcm
+							_quiz.clear();
+							_quiz.questionTitle = data.question;
+							_quiz.dataProvider = data.responses;
+							_quiz.explanation = data.explanation;
+							positionPanel();
+							break;
+						}
+					}
+				}
+				else {
+					ApplicationChannel.getInstance().addEventListener(ServerEventList.ON_DATAQUIZ, dataQuizHandler);
+					sendPublicEvent(new BaseEvent(ServerEventList.GET_DATAQUIZ, quizId));
+				}
 			}
 			else
 			{
 				if (sourceTarget)
 				{
 					sourceTarget.mouseEnabled = true;
-//					sourceTarget.filters = [];
 				}
 					
 				sendEvent(new Event(EventList.UNFREEZE_SCENE));
