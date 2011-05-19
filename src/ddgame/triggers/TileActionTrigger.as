@@ -162,7 +162,7 @@ package ddgame.triggers {
 			
 			// Le trigger peut être déjà fini dans le cas ou il y ait plusieurs
 			// actions définis avec des durées non bloquantes, ces actions n'étaient pas encore
-			// finient alors que la pile d'actions à été lue entièrement et que le trigger s'est
+			// finies alors que la pile d'actions à été lue entièrement et que le trigger s'est
 			// terminé.
 			if (!actions) return;
 			
@@ -180,10 +180,10 @@ package ddgame.triggers {
 						return;						
 					}
 				}
-				// on est en boucle, reset de l'index
+				// on est en boucle infinie, reset de l'index
 				actionIndex = 0;
 			}
-			
+			// trace("loop:", lp, "exec:", nexec, "actionIndex:", actionIndex);
 			// prochaine action
 			var act:Object = actions[actionIndex];
 			
@@ -204,6 +204,9 @@ package ddgame.triggers {
 		 */
 		private function doAction (target:Object, act:Object) : Boolean
 		{
+			// option freeze / unfreeze scène
+			if ("fs" in act) sendEvent(new BaseEvent(act.fs ? EventList.FREEZE_SCENE : EventList.UNFREEZE_SCENE));
+			
 			// option attendre fin
 			var wait:Boolean = act.we;
 
@@ -337,7 +340,7 @@ package ddgame.triggers {
 								// on veut que le joueur soit obligé de passer par n clique dans un lien du ballon
 								// pnj / avatar
 								if (!autoClose) addWaitListener(EventList.PNJ_BALLONEVENT, channel);
-								else // MOUSE_DOWN, car abonnement sur click est trop rapide est catch le MOUSE_UP
+								else // MOUSE_DOWN, car abonnement sur click est trop rapide et catch le MOUSE_UP
 									addWaitListener(MouseEvent.MOUSE_DOWN, stage);
 							}
 						}
@@ -359,7 +362,7 @@ package ddgame.triggers {
 						if (anims.indexOf(an) > -1)
 						{
 							// rotation du tile
-							if (act.p.r) target.rotation = act.p.r;
+							if (act.p.r is int) target.rotation = act.p.r;
 							// on est sur une animation
 							if (!act.p.f)
 							{
