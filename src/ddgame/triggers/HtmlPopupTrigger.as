@@ -10,10 +10,11 @@ package ddgame.triggers {
 	import flash.display.Sprite;
 	import flash.display.MovieClip;
 	import flash.display.SimpleButton;
-	import flash.filters.DropShadowFilter;
 	import flash.filters.GlowFilter;
-	import flash.geom.Point;
-
+	import flash.geom.*;
+	
+	import flash.utils.*
+	
 	import flash.net.URLRequest;
 	
 	import com.sos21.events.BaseEvent;
@@ -28,7 +29,6 @@ package ddgame.triggers {
 	import ddgame.triggers.TriggerProperties;
 	import ddgame.ui.UIHelper;
 	import ddgame.events.EventList;
-	import ddgame.events.ServerEventList;
 	
 	import gs.TweenLite;
 	import gs.easing.*;
@@ -114,6 +114,22 @@ package ddgame.triggers {
 			complete();
 		}
 		
+		public function displayPage (index:int) : Boolean
+		{
+			var st:int = getTimer();
+			if (!getPropertie("text")) return false;
+
+			// TODO passer par une regexp
+			var pages:Array = getPropertie("text").split("#page#");
+			var txt:String = pages[index];
+			if (!txt) return false;
+			
+			// TODO remplacement futures balises d'insertions
+			
+			_component.text = txt.replace(/[ \t\n\r\f\v]+?$/gi,"");
+//			trace("parses page time:", getTimer() - st);
+			return true;
+		}
 		
 		//--------------------------------------
 		//  EVENT HANDLERS
@@ -171,6 +187,9 @@ package ddgame.triggers {
 				ids = tlist[i].split(":");
 				switch (ids[0])
 				{
+					case "page" :
+						displayPage(ids[1]);
+						break;
 					case "trigger" :
 						tproxy.launchTriggerByID(ids[1]);
 						break;
@@ -207,56 +226,24 @@ package ddgame.triggers {
 			
 			// on recup l'asset
 			var libProxy:LibProxy = LibProxy(facade.getProxy(LibProxy.NAME));
-			var classRef:Class = libProxy.lib.getClassFrom(libProxy.libPath + "HtmlPopup.swf", isPropertie("skin") ? getPropertie("skin") : "DefaultPopup");
+			var classRef:Class = libProxy.lib.getClassFrom(	libProxy.libPath + "HtmlPopup.swf",
+																			isPropertie("skin") ? getPropertie("skin") : "DefaultPopup"	);
 			_component = new classRef;
 			_component.manager = this;
 			
 			_component.addEventListener("closePopup", complete, false, 0, true);
-						
-			// ajout d'un ombré
-			var filt:DropShadowFilter = new DropShadowFilter(4);
-			filt.alpha = 0.5;
-			_component.filters = [filt];
 			
-			// styleSheet de la popup
-			htmlStyleSheet = new StyleSheet();
-			
-			var link:Object = new Object();
-			/*link.fontFamily = "Arial";*/
-			link.fontSize = "13";
-			link.textDecoration= "none";
-			/*link.fontStyle = "italic";*/
-			link.color = "#EC02BD";
-			
-			var hover:Object = new Object();
-			hover.textDecoration= "underline";
-						
-/*			var active:Object = new Object();
-			active.fontWeight = "bold";
-			active.color = "#FF0000";
-
-			var visited:Object = new Object();
-			visited.fontWeight = "bold";
-			visited.color = "#cc0099";
-			visited.textDecoration= "underline";*/
-			
-			htmlStyleSheet.setStyle("a:link", link);
-			htmlStyleSheet.setStyle("a:hover", hover);
-
-			/*style.setStyle("a:active", active);
-			style.setStyle(".visited", visited);*/
-			
-			_component.htmlContent.styleSheet = htmlStyleSheet;
-			
-			// placement et taille
-			stage.addChild(_component);
+			// Placement et taille			
 			_component.x = isPropertie("x") ? int(getPropertie("x")) : ((UIHelper.VIEWPORT_AREA.width - _component.width) / 2) + UIHelper.VIEWPORT_AREA.x;
 			_component.y = isPropertie("y") ? int(getPropertie("y")) : UIHelper.VIEWPORT_AREA.y + 20;
 			if (isPropertie("width")) _component.width = int(getPropertie("width"));
 			if (isPropertie("height")) _component.maxHeight = int(getPropertie("height"));
+			if (isPropertie("cb")) _component.showCloseButton = getPropertie("cb");
+			
+			stage.addChild(_component);
 
-			// on passe le texte
-			_component.text = getPropertie("text");
+			// on Affiche la première page
+			displayPage(0);
 	
 			// fx d'aparition
 			TweenLite.from(_component, 0.5, {tint:0xffffff});
