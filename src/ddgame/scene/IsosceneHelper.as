@@ -72,17 +72,20 @@ package ddgame.scene {
 		 * Additional getter to return the correct component type
 		 */
 		public function get component() : IsoTileWorld
-		{
-			return _isoScene;
-		}
-
+		{ return _isoScene; }
+		
+		/**
+		 * Flag scène figée
+		 */
+		public function get sceneFreezed () : Boolean
+		{ return !_isoScene.mouseEnabled; }
+		
 		//--------------------------------------
 		//  PUBLIC METHODS
 		//--------------------------------------
 		
 		public function buildScene (tlist:Array /* of AbstractTile */) : void
 		{
-			trace("-- build scene @" + toString());
 			stage.addChildAt(_isoScene, 0);
 			
 			if (datamapProxy.enableNoMouseEventInAlpha)
@@ -198,7 +201,7 @@ package ddgame.scene {
 			_isoScene.removeEventListener(MouseEvent.MOUSE_OVER, sceneMouseHandler);
 			_isoScene.removeEventListener(MouseEvent.MOUSE_OUT, sceneMouseHandler);
 			_isoScene.removeEventListener(MouseEvent.MOUSE_DOWN, sceneMouseHandler);
-			_isoScene.removeEventListener(MouseEvent.MOUSE_UP, sceneMouseHandler);						
+			_isoScene.removeEventListener(MouseEvent.MOUSE_UP, sceneMouseHandler);					
 		}
 		
 		
@@ -418,6 +421,7 @@ trace(up.posToString() + " @" + toString());
 		override protected function listInterest():Array /* of Constant */
 		{
 			return [
+						EventList.CLEAR_MAP,
 						EventList.TILEFACTORY_TILELIST_PARSED,
 						EventList.PLAYER_MOVE_COMPLETE,
 						EventList.FREEZE_SCENE,

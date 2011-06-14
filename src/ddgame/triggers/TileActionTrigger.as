@@ -14,6 +14,7 @@ package ddgame.triggers {
 	import ddgame.events.EventList;
 	import ddgame.sound.SoundTrack;
 	import ddgame.sound.AudioHelper;	
+	import com.sos21.utils.*;
 	
 	/**
 	 *	Action d'un tile, bouger, animer, afficher / masquer...
@@ -155,7 +156,7 @@ package ddgame.triggers {
 		 *	@param event Event
 		 */
 		protected function nextAction (event:Event = null) : void
-		{
+		{			
 			// on enleve le listener si on était sur une action avec
 			// attente fin
 			if (event) removeWaitListener();
@@ -316,33 +317,30 @@ package ddgame.triggers {
 							while (ls.length)
 								pls.push("<a href=\"event:trigger:" + ls.shift() + "#autoClose\">" + ls.shift() + "</a>");
 							
-							txt += "\n";
-							txt += la ? pls.join(" ") : pls.join("\n");
+							txt += '<font size="6">\n\n</font>';
+							txt +=  la ? pls.join(" ") : pls.join("\n");
 							// on à des liens, check si on attend un clique obligatoire
 							// sur un de ceux-ci avant de passer à la suite.
-							if (getPropertie("_fs") && pls.length > 0) autoClose = false;
+						//	if (getPropertie("_fs") && pls.length > 0) autoClose = false;
 						}
-						if (act.p.s) {
-							pnj.displayThink(txt, d, autoClose, oc, act.p.bw ? act.p.bw : 200);
-						}
-						else {
-							pnj.displayTalk(txt, d, autoClose, oc, act.p.bw ? act.p.bw : 200);
-						}
-
+						
 						if (wait)
 						{
 							if (d > 0) {
 								setTimer(d);
 							} 
 							else {
-								// Ok, on est sur un trigger qui freeze la scène et on fait parler un pnj / avatar
-								// pour lequel on va avoir un choix de réponses. Logiquement ça voudrait dire que :
-								// on veut que le joueur soit obligé de passer par n clique dans un lien du ballon
-								// pnj / avatar
-								if (!autoClose) addWaitListener(EventList.PNJ_BALLONEVENT, channel);
-								else // MOUSE_DOWN, car abonnement sur click est trop rapide et catch le MOUSE_UP
-									addWaitListener(MouseEvent.MOUSE_DOWN, stage);
+								// On s'abonne aux events ballon, pour passer à la suite
+								addWaitListener(EventList.PNJ_BALLONEVENT, channel);
 							}
+						}
+
+						// Affichage selon type de ballon
+						if (act.p.s) {
+							pnj.displayThink(txt, d, autoClose, oc, act.p.bw ? act.p.bw : 200);
+						}
+						else {
+							pnj.displayTalk(txt, d, autoClose, oc, act.p.bw ? act.p.bw : 200);
 						}
 						
 					}
@@ -478,7 +476,7 @@ package ddgame.triggers {
 		{
 			currentTargetListener = target;
 			currentTypeListener = type;
-			target.addEventListener(type, nextAction);
+			target.addEventListener(type, nextAction, false, 0, true);
 		}
 
 		/**

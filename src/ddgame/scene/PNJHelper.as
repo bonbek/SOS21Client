@@ -284,7 +284,6 @@ package ddgame.scene {
 			removeBallon();
 			// on crée le nouveau ballon
 			createBallon("BallonPopup", duration, stopAutoLife, autoClose, bwidth).text = "<body>" + text + "</body>";
-			ballon.removeChild(ballon.closeButton);
 			TweenLite.from(ballon, 0.5, {alpha:0});
 
 			return ballon;
@@ -322,7 +321,7 @@ package ddgame.scene {
 			
 			ballon.data = { stopAutoLife:stopAutoLife, autoClose:autoClose };
 			if (stopAutoLife)  autoLife = false;
-			if (autoClose) isosceneHelper.component.addEventListener(MouseEvent.MOUSE_DOWN, ballonEventHandler, false, 0, true);
+			if (autoClose) stage.addEventListener(MouseEvent.MOUSE_DOWN, ballonEventHandler, false, 0, true);
 
 			return ballon;
 		}
@@ -338,7 +337,7 @@ package ddgame.scene {
 				ballonTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, ballonEventHandler, false);
 				ballon.htmlContent.removeEventListener(TextEvent.LINK, ballonEventHandler, false);
 				component.removeEventListener(TileEvent.MOVE, componentHandler, false);
-				isosceneHelper.component.removeEventListener(MouseEvent.MOUSE_DOWN, ballonEventHandler, false);
+				stage.removeEventListener(MouseEvent.MOUSE_DOWN, ballonEventHandler, false);
 				try {
 					stage.removeChild(ballon);
 				} catch (e:Error) { }
@@ -421,14 +420,29 @@ package ddgame.scene {
 			{
 				case event is MouseEvent :
 				{
-					if (ballon)
+					if (ballon && !isosceneHelper.sceneFreezed)
 					{
-						// on test si ballon est en fermeture auto
+						// Ballon est en fermeture auto ?
 						if (ballon.data.autoClose)
 						{
-							// test si clique est hors du ballon
-							if (!ballon.contains(DisplayObject(event.target)))
-								removeBallon();
+							if (!ballon.hasLink) {
+								// Le ballon ne contient pas de liens et est
+								// en fermeture auto, on enlève le ballon (même)
+								// si clique est dedans
+								var evt:BaseEvent = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:"removeBallon", event:event}, false, true);
+								sendEvent(evt);
+								if (!event.isDefaultPrevented()) removeBallon();
+							}
+							else {
+								if (!ballon.contains(DisplayObject(event.target)))
+								{
+									// Le ballon contient des liens mais le clique
+									// est hors de celui-ci, on ferme le ballon
+									evt = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:"removeBallon", event:event}, false, true);
+									sendEvent(evt);
+									if (!event.isDefaultPrevented()) removeBallon();
+								}
+							}
 						}
 					}
 					break;
@@ -436,7 +450,7 @@ package ddgame.scene {
 				case event is TextEvent : // > clique sur lien dans le ballon
 				{
 					// hook pour empêcher execution du lien texte complet
-					var evt:BaseEvent = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:event.type, event:event}, false, true);
+					evt = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:event.type, event:event}, false, true);
 					sendEvent(evt);
 					
 					if (!evt.isDefaultPrevented())
@@ -997,25 +1011,32 @@ package ddgame.scene {
 			
 			var body:Object = new Object();
 			body.fontFamily = "Verdana";
-			body.fontSize = "11";
+			body.fontSize = "12";
 			
 			var hover:Object = new Object();
-			hover.fontWeight = "bold";
-			hover.color = "#7F007F";
+//			hover.fontWeight = "bold";
+			hover.color = "#FF0092";
+//			hover.fontSize = "12";
 //			hover.textDecoration= "underline";
 
 			var link:Object = new Object();
-			link.fontWeight = "bold";
+//			link.fontWeight = "bold";
+//			link.fontFamily = "Verdana";
+//			link.fontSize = "12";
 //			link.textDecoration= "underline";
-			link.color = "#FF0092";
+			link.color = "#7F007F";
 
 			var active:Object = new Object();
-			active.fontWeight = "bold";
-			active.color = "#FF0092";
+//			active.fontWeight = "bold";
+//			active.fontFamily = "Verdana";
+//			active.fontSize = "12";
+			active.color = "#7F007F";
 
 			var visited:Object = new Object();
-			visited.fontWeight = "bold";
-			visited.color = "#FF0092";
+//			visited.fontFamily = "Verdana";
+//			visited.fontWeight = "bold";
+//			visited.fontSize = "11";
+			visited.color = "#7F007F";
 //			visited.textDecoration= "underline";
 
 			ballonStyleSheet.setStyle("body", body);
