@@ -429,18 +429,16 @@ package ddgame.scene {
 								// Le ballon ne contient pas de liens et est
 								// en fermeture auto, on enlève le ballon (même)
 								// si clique est dedans
-								var evt:BaseEvent = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:"removeBallon", event:event}, false, true);
-								sendEvent(evt);
-								if (!event.isDefaultPrevented()) removeBallon();
+								removeBallon();
+								sendEvent(new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:"ballonRemoved", event:event}, false, true));
 							}
 							else {
 								if (!ballon.contains(DisplayObject(event.target)))
 								{
 									// Le ballon contient des liens mais le clique
 									// est hors de celui-ci, on ferme le ballon
-									evt = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:"removeBallon", event:event}, false, true);
-									sendEvent(evt);
-									if (!event.isDefaultPrevented()) removeBallon();
+									removeBallon();
+									sendEvent(new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:"ballonRemoved", event:event}, false, true));
 								}
 							}
 						}
@@ -450,7 +448,7 @@ package ddgame.scene {
 				case event is TextEvent : // > clique sur lien dans le ballon
 				{
 					// hook pour empêcher execution du lien texte complet
-					evt = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:event.type, event:event}, false, true);
+					var evt:BaseEvent = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:event.type, event:event}, false, true);
 					sendEvent(evt);
 					
 					if (!evt.isDefaultPrevented())
