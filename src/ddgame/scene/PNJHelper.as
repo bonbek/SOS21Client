@@ -450,7 +450,7 @@ package ddgame.scene {
 					// hook pour empêcher execution du lien texte complet
 					var evt:BaseEvent = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:event.type, event:event}, false, true);
 					sendEvent(evt);
-					
+	
 					if (!evt.isDefaultPrevented())
 					{
 						// format du lien > event:trigger:slid:23#autoClose
@@ -464,7 +464,6 @@ package ddgame.scene {
 						var l1:int = tList.length;
 						if (l1 > 0)
 						{
-						//	for (var i:int = 0; i < l1; i++)
 							// Patch autoClose, si un trigger est un ballon, le trigger était lancé puis fermé
 							// par le autoClose, du coup on parcours la liste à l'envers on tombe sur le autoClose
 							// en premier !! DONC il faut respecter le fait que le autoClose doit se trouver toujours
@@ -478,14 +477,8 @@ package ddgame.scene {
 									{
 										var triggerId:int = tArgs[1] == "slid" ? tArgs[2] : tArgs[1];
 										if (triggerId)		
-//										if (tArgs[1] == "slid")
-										{ // on est sur un lien symbolique vers un trigger											
-//											var triggerId:int = tArgs[2];
-											// hook pour empêcher le lancement du trigger
-											subEvt = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:EventList.LAUNCH_TRIGGER, triggerId:triggerId});
-											sendEvent(subEvt);
-											if (!subEvt.isDefaultPrevented())
-												sendEvent(new BaseEvent(EventList.LAUNCH_TRIGGER, {id:triggerId}));
+										{
+											sendEvent(new BaseEvent(EventList.LAUNCH_TRIGGER, {id:triggerId}));
 										}
 										else
 										{ // on à un encodage trigger
@@ -495,26 +488,21 @@ package ddgame.scene {
 									}
 									case "autoClose" : // > on est sur option fermeture auto du ballon
 									{
-										// hook pour empêcher la fermeture du ballon
-										subEvt = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:"closeBallon"});
-										sendEvent(subEvt);
-										if (!subEvt.isDefaultPrevented())
-											removeBallon();
+										removeBallon();
+										sendEvent(new BaseEvent(EventList.PNJ_BALLON_CLOSED, this));
 										break
 									}
 									case "jumpInTrip" : // > on est sur un saut dans le xmlTrip
 									{
-										var nodeId:String = tArgs[1];
-										trace(this, "jumpInTrip", nodeId);
-										subEvt = new BaseEvent(EventList.PNJ_BALLONEVENT, {target:this, kind:"jumpInTrip", nodeId:nodeId});
-										sendEvent(subEvt);
-										if (!subEvt.isDefaultPrevented())							
-											jumpInLife(nodeId);
+										var nodeId:String = tArgs[1];					
+										jumpInLife(nodeId);
 										break;
 									}
 									default :
+									{
 										sendEvent(new BaseEvent(EventList.LAUNCH_TRIGGER, {id:tArgs[0]}));
 										break;
+									}
 								}
 							}
 						}

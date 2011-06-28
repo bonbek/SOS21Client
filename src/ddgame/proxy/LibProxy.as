@@ -155,7 +155,6 @@ package ddgame.proxy {
 				}
 				case GLibEvent.ON_LIB_COMPLETE :
 				{
-					trace("-- Lib complete @" + toString());
 					_lib.removeEventListener(GLibEvent.ON_LIB_COMPLETE, glibHandler);
 					_lib.removeEventListener(GLibEvent.ON_PROGRESS, glibHandler);
 

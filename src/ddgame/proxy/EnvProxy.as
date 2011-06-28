@@ -27,9 +27,10 @@ package ddgame.proxy {
 		//  CONSTRUCTOR
 		//--------------------------------------
 	
-		public function EnvProxy (sname:String = null)
+		public function EnvProxy (document:Object = null)
 		{
-			super(sname == null ? NAME : sname);
+			super(NAME, document ? document : {variables:[]});			
+			globals = _data.variables;
 		}
 	
 		//--------------------------------------
@@ -187,13 +188,17 @@ package ddgame.proxy {
 				// on est sur une variable globale
 				case "g" :
 				{
-					value = globals[part.shift()].value;
+					value = globals[part.shift()];
+					if (value)
+						value = value.value;
 					break;
 				}
 				// on est sur une variable locale
 				case "l" :
 				{
-					value = datamapProxy.env[part.shift()].value;
+					value = datamapProxy.env[part.shift()];
+					if (value)
+						value = value.value;
 					break;
 				}
 				// par defaut la valeur est la clé que l'on essaie de parser / caster
@@ -230,7 +235,7 @@ package ddgame.proxy {
 		public function set (key:String, value:*) : void
 		{
 			var part:Array = key.split(".");
-			var value:*;
+			var key:String;
 			
 			switch (part.shift())
 			{
@@ -256,13 +261,31 @@ package ddgame.proxy {
 				// on est sur une variable globale
 				case "g" :
 				{
-					// TODO
+					key = part.shift();
+					if (globals[key])
+					{
+						if (globals[key].value != value)
+						{
+							globals[key].value = value;
+							// Sauvegarde
+							_data.save(["variables"]);
+						}						
+					}
 					break;
 				}
 				// on est sur une variable locale
 				case "l" :
 				{
-					// TODO
+					key = part.shift();
+					if (datamapProxy.env[key])
+					{
+						if (datamapProxy.env[key].value != value)
+						{
+							datamapProxy.env[key].value = value;
+							// Sauvegarde
+							datamapProxy.getData().save(["variables"]);
+						}						
+					}
 					break;
 				}
 			}
@@ -271,15 +294,6 @@ package ddgame.proxy {
 		//--------------------------------------
 		//  EVENT HANDLERS
 		//--------------------------------------
-		
-		/**
-		 * Reception de la liste des globals
-		 *	@param e Object
-		 */
-		private function onGlobals (result:Object) : void
-		{
-			globals = [null].concat(result);
-		}
 		
 		//--------------------------------------
 		//  PRIVATE & PROTECTED INSTANCE METHODS
@@ -297,16 +311,7 @@ package ddgame.proxy {
 		
 		protected function get serverProxy () : IClientServer
 		{ return IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)); }
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function initialize () : void
-		{
-			// recup des globals
-			serverProxy.Globals("list").addOnce(onGlobals)
-		}
-	
+			
 	}
 
 }

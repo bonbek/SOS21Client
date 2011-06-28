@@ -7,11 +7,11 @@ package ddgame.triggers {
 	import com.sos21.helper.AbstractHelper;
 	import ddgame.triggers.AbstractTrigger;
 	import ddgame.events.EventList;
-	import ddgame.events.ServerEventList;
 	import ddgame.proxy.DatamapProxy;
 	import ddgame.scene.PlayerHelper;
 	import ddgame.ui.UIHelper;
 	import ddgame.proxy.PlayerProxy;
+	import ddgame.minigame.*;
 	
 	/**
 	 *	Trigger chagement de scène
@@ -140,8 +140,7 @@ package ddgame.triggers {
 		private function popTransportClicked (item:Object) : void
 		{
 			// check si joueur à assez de points
-			var playerEco:int = playerProxy.getBonus(3).gain;
-			if (playerEco - item.data.ecost < 0)
+			if (playerProxy.eco - item.data.ecost < 0)
 			{
 				
 			}
@@ -175,15 +174,15 @@ package ddgame.triggers {
 				// displatch points
 				// > piraniak
 				/*sendEvent(new BaseEvent(EventList.ADD_BONUS, {theme:1, bonus:transport.pcost}));*/
-				// > éco
-				if (transport.ecost)
-					sendEvent(new BaseEvent(EventList.ADD_BONUS, {theme:3, bonus:-transport.ecost}));
 				// > social
 				if (transport.scost)
-					sendEvent(new BaseEvent(EventList.ADD_BONUS, {theme:2, bonus:transport.scost}));
+					sendEvent(new BaseEvent(EventList.ADD_BONUS, {index:1, value:transport.scost}));
+				// > éco					
+				if (transport.ecost)
+					sendEvent(new BaseEvent(EventList.ADD_BONUS, {index:2, bonus:-transport.ecost}));
 				// > environnement
 				if (transport.encost)
-					sendEvent(new BaseEvent(EventList.ADD_BONUS, {theme:4, bonus:transport.encost}));
+					sendEvent(new BaseEvent(EventList.ADD_BONUS, {index:3, bonus:transport.encost}));
 				
 				// affichage pop info
 				if ("info" in transport)
@@ -294,7 +293,7 @@ package ddgame.triggers {
 				else
 				{
 					// plusieurs moyens de transports
-					var playerEco:int = playerProxy.getBonus(3).gain;
+					var playerEco:int = playerProxy.eco;
 					popup = uiHelper.createWindow(false);
 					popup.closeButton = true;
 					popup.onClose.addOnce(onPopupClosed);
@@ -341,7 +340,7 @@ package ddgame.triggers {
 		private function transportChoosed () : void
 		{
 			// check si joueur à assez de points
-			var playerEco:int = playerProxy.getBonus(3).gain;
+			var playerEco:int = playerProxy.eco;
 			if (transport)
 			{
 //				5 - 20 = -15;
@@ -536,6 +535,7 @@ internal class InfoText extends TextField {
 }
 
 import flash.text.*;
+import ddgame.minigame.*;
 
 /**
  * Label coût
@@ -594,6 +594,8 @@ internal class CostLabel extends MiniGameBox {
 	
 }
 
+
+import ddgame.minigame.*;
 /**
  * Boutton choix destination
  * 

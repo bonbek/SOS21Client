@@ -31,6 +31,7 @@ package ddgame.commands {
 			if (event.type == EventList.SCENE_BUILDED)
 			{
 				if (event.isDefaultPrevented()) return;
+
 				// patch lancement des triggers à l'init des map
 				var trigProxy:TileTriggersProxy = TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME));
 				trigProxy.triggersEnabled = true;
@@ -39,6 +40,7 @@ package ddgame.commands {
 			else
 			{
 				var dmProxy:DatamapProxy = DatamapProxy(facade.getProxy(DatamapProxy.NAME));
+				trace("Info: Build: place", dmProxy.mapId, this);
 			
 				// > triggers externes (voir StartUpdateMapCommand)
 				// recupération des classe de triggers externes pour enregistrement
@@ -60,20 +62,9 @@ package ddgame.commands {
 					trigLocator.registerTriggerClass(trId, classDef);
 				}
 			
-				// mise à jour variables locales joueur
-//				PlayerProxy(facade.getProxy(PlayerProxy.NAME)).getData().locals = dmProxy.getData().playerLocals;
-				PlayerProxy(facade.getProxy(PlayerProxy.NAME)).setPlace(dmProxy.mapId);
+				PlayerProxy(facade.getProxy(PlayerProxy.NAME)).setPlace(String(dmProxy.mapId));
 				// lance la construction
 				dmProxy.parseData();
-				
-				
-				trace("Info: map ", dmProxy.mapId, "updated", this);
-
-				// mise à jour du cookie
-	//			var cookie:Object = PlayerProxy(facade.getProxy(PlayerProxy.NAME)).cookie;
-	//			cookie.data.map = dmProxy.mapId;
-	//			cookie.data.triggers = [];
-	//			cookie.flush();
 				}
 		}
 				

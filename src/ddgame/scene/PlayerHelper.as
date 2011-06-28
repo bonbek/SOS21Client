@@ -17,8 +17,7 @@ package ddgame.scene {
 	import com.sos21.tileengine.display.MCTileView;
 	import ddgame.helper.HelperList;
 	import ddgame.events.EventList;
-	import ddgame.proxy.DatamapProxy;
-	import ddgame.proxy.LibProxy;
+	import ddgame.proxy.*;
 	import ddgame.triggers.ITrigger;
 	import ddgame.events.TriggerEvent;
 	import ddgame.scene.PNJHelper;
@@ -43,10 +42,9 @@ package ddgame.scene {
 		//  CONSTRUCTOR
 		//--------------------------------------
 
-		public function PlayerHelper (skin:Object = null)
+		public function PlayerHelper ()
 		{
 			super(NAME);
-			_skin = skin;
 		}
 
 		//--------------------------------------
@@ -103,7 +101,7 @@ package ddgame.scene {
 		
 		public function movePlayer (path:Array /* of Object */) : void
 		{
-			timer.reset();
+//			timer.reset();
 			component.stage.removeEventListener(MouseEvent.CLICK, handleEvent, true);
 			component.pathTo(path);
 			//sndFx.play(0, -1);
@@ -115,8 +113,8 @@ package ddgame.scene {
 		override public function initialize():void
 		{
 			defaultInit();
- 			timer = new Timer(60000, 1);
-			timer.addEventListener(TimerEvent.TIMER, handleEvent);
+ 			//timer = new Timer(60000, 1);
+			//timer.addEventListener(TimerEvent.TIMER, handleEvent);
 		}
 		
 		//--------------------------------------
@@ -140,7 +138,7 @@ package ddgame.scene {
 				{
 					sendEvent(new Event(EventList.PLAYER_MOVE_COMPLETE));
 					stage.addEventListener(MouseEvent.CLICK, handleEvent, true);
-					timer.start();
+					//timer.start();
 					//sndFx.stop();
 					break;
 				}
@@ -163,7 +161,7 @@ package ddgame.scene {
 				{
 					stage.removeEventListener(MouseEvent.CLICK, handleEvent, true);
 					component.stop();
-					timer.reset();
+					//timer.reset();
 					if (ballon)
 					{
 						ballon.data.stopAutoLife = false;
@@ -173,12 +171,12 @@ package ddgame.scene {
 				}
 				case TimerEvent.TIMER :
 				{
-					timer.reset();
+					/*timer.reset();
 					lastRotation = component.rotation;
 					lastLabel = component.getView().label;
 					
 					component.rotation = 0;
-					component.gotoAndPlay("buzy");
+					component.gotoAndPlay("buzy");*/
 					break;
 				}
 				case MouseEvent.CLICK :
@@ -205,7 +203,8 @@ package ddgame.scene {
 		{
 			if (component) return;
 			
-			var cl:Class = libProxy.getDefinitionFrom(libProxy.spritesPath + "AvatarSkins.swf", _skin.className);
+			var classDef:String = playerProxy.avatarSkin.classDef;
+			var cl:Class = libProxy.getDefinitionFrom(libProxy.spritesPath + "AvatarSkins.swf", classDef);
 			var mc:MovieClip = new cl();
 			
 			// --> Patch pour scale du perso 
@@ -258,14 +257,15 @@ package ddgame.scene {
 		 * @private
 		 */
 		private function get dataMap ():DatamapProxy
-		{
-			return DatamapProxy(facade.getProxy (DatamapProxy.NAME))
-		}
+		{ return DatamapProxy(facade.getProxy (DatamapProxy.NAME)) }
+		
+		private function get playerProxy () : PlayerProxy
+		{ return PlayerProxy(facade.getProxy(PlayerProxy.NAME)); }
 		
 		/**
 		 * @inheritDoc
 		 */
-		override protected function listInterest() : Array
+		override protected function listInterest () : Array
 		{
 			return [ EventList.SCENE_BUILDED,
 			 			EventList.CLEAR_MAP ];

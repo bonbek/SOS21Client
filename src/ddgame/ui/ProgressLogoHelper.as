@@ -98,11 +98,6 @@ package ddgame.ui {
 			}
 		}
 		
-		public function test(event:Event):void
-		{
-			trace("test @" + toString);
-		}
-		
 		//--------------------------------------
 		//  PRIVATE & PROTECTED INSTANCE METHODS
 		//--------------------------------------
@@ -118,7 +113,7 @@ package ddgame.ui {
 		 * Call by super class
 		 * List the Event interest this Helper is interested in
 		 */
-		override protected function listInterest():Array
+		override protected function listInterest() : Array
 		{
 			return [];
 		}

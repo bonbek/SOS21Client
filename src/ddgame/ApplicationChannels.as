@@ -1,6 +1,4 @@
 package ddgame {
-
-	import com.sos21.events.EventChannel;
 	
 	/**
 	 *	Constantes canaux évenements des facades
@@ -18,7 +16,7 @@ package ddgame {
 		//--------------------------------------
 		
 		// canal client
-		public static const CLIENT_CHANNEL:EventChannel = new EventChannel("clientChannel");
+		public static const CLIENT_CHANNEL:String = "clientChannel";
 			
 	}
 

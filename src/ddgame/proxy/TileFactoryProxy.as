@@ -89,23 +89,11 @@ package ddgame.proxy {
 				}
 				else if (o.sheet)
 				{
-					trace(this, "HAS SHEET", o.sheet);
-					// serialisé sous forme :
-					// frameWidth:frameHeight:label:nframes:nrotations:label:nframes:nrotations...
-//					dob = lib.lib.getLoader(aspath + String(o.assets[0]));
 					dob = lib.getTileAsset(o.assets[0]);
-//					trace(this, dob);
-//					trace(this, dob.content);
-//					var bitmapdata:BitmapData = new BitmapData(dob.content.width, dob.content.height, true, 0);
-//					var bitmp:Bitmap = new Bitmap(bitmapdata);
-//					bitmapdata.draw(dob);
-//					continue;
 					sheet = o.sheet.split(":");
 					sheet.unshift(o.ofsY);
 					sheet.unshift(o.ofsX);
 					tv = new AnimatedTileView(dob.content, sheet);
-//					dob.x = o.ofsX;
-//					dob.y = o.ofsY;
 				} else {
 					dob = lib.lib.getLoader(aspath + String(o.assets[0]));
 					tv = new TileView(dob);

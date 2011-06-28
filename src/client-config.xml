@@ -12,28 +12,10 @@
 		<show-unused-type-selector-warnings>true</show-unused-type-selector-warnings>
 		<debug>false</debug>
 
-		<!-- Example library linkage -->
-
-		<!-- for swc's -->
-		<library-path append="true">
-			<path-element>../../lib/bin/</path-element>
-		</library-path>
-		
-		<!-- for src -->
+		<!-- libs -->
 		<source-path append="true">
-			<path-element>../../lib/src/</path-element>
-		</source-path>
-		
-		<!-- for src -->
-		<source-path append="true">
-			<path-element>../../ui/src/</path-element>
-		</source-path>
-		
-		<!-- for src -->
-		<source-path append="true">
-			<path-element>../../minigames/lib/src/</path-element>
-		</source-path>
-		
+			<path-element>../lib/src/</path-element>
+		</source-path>		
 		
 	</compiler>
 	<!-- <link-report>link-report.xml</link-report> -->

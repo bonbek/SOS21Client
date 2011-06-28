@@ -63,16 +63,6 @@ package ddgame.triggers {
 		 */
 		private var _component:MovieClip;
 		
-		/**
-		 *	@private
-		 *	editeur html (temporaire)
-		 */
-		private var _editor:Object;
-		private var _editButton:SimpleButton;
-		private var _unEditButton:SimpleButton;
-		private var _saveButton:SimpleButton;
-		private var _saveMessage:Sprite;
-		
 		//---------------------------------------
 		// PUBLIC VARIABLES
 		//---------------------------------------
@@ -89,7 +79,6 @@ package ddgame.triggers {
 		
 		public function get textField() : TextField
 		{
-//			trace(_component.htmlContent);
 			return _component ? _component.htmlContent : null;
 		}
 		
@@ -134,27 +123,6 @@ package ddgame.triggers {
 		//--------------------------------------
 		//  EVENT HANDLERS
 		//--------------------------------------
-		
-		/**
-		 *	@private
-		 *	Recption events clavier pour empêcher fonction debug
-		 */
-		protected function keyDownHandler(e:Event):void
-		{
-			e.stopImmediatePropagation();
-		}
-		
-		/**
-		 *	@private
-		 *	reception events souris sur stage
-		 */		
-		protected function stageMouseHandler(event:MouseEvent):void
-		{
-//			if (!_component.getBounds(stage).contains(stage.mouseX, stage.mouseY) && event.target is AbstractTile) {
-			if (event.target is AbstractTile) {
-				complete();
-			}
-		}
 		
 		/**
 		 *	@private
@@ -231,8 +199,6 @@ package ddgame.triggers {
 			_component = new classRef;
 			_component.manager = this;
 			
-			_component.addEventListener("closePopup", complete, false, 0, true);
-			
 			// Placement et taille			
 			_component.x = isPropertie("x") ? int(getPropertie("x")) : ((UIHelper.VIEWPORT_AREA.width - _component.width) / 2) + UIHelper.VIEWPORT_AREA.x;
 			_component.y = isPropertie("y") ? int(getPropertie("y")) : UIHelper.VIEWPORT_AREA.y + 20;
@@ -255,12 +221,9 @@ package ddgame.triggers {
 				sourceTarget.filters = [new GlowFilter(0x990000, 1, 10, 10)];
 			}
 			
-			// ajout listener pour fermer la popup si user click dans la scène
-			stage.addEventListener(MouseEvent.MOUSE_UP, stageMouseHandler, false, 0, true);
+			_component.addEventListener("closePopup", complete, false, 0, true);
 			// ajout listener sur les liens cliqués dans la popup
 			_component.htmlContent.addEventListener(TextEvent.LINK, componentLinkHandler, false, 0, true);
-			// PATCH pour éviter les fonctions debuggage (GridHelper)
-			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler, false, 100, true);
 		}
 		
 		/**
@@ -269,8 +232,6 @@ package ddgame.triggers {
 		override protected function complete(event:Event = null):void
 		{
 			
-			stage.removeEventListener(MouseEvent.MOUSE_UP, stageMouseHandler, false);
-			stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler, false);
 			if (sourceTarget is AbstractTile)
 			{
 				sourceTarget.filters = [];
@@ -279,6 +240,7 @@ package ddgame.triggers {
 			if (_component)
 			{
 				_component.removeEventListener("closePopup", complete, false);
+				_component.htmlContent.removeEventListener(TextEvent.LINK, componentLinkHandler, false);
 				TweenLite.to(_component, 0.1, {tint:0xffffff, onComplete:stage.removeChild, onCompleteParams:[_component]})
 			}
 			

@@ -27,8 +27,10 @@ package ddgame.triggers {
 
 		override public function execute (e:Event = null) : void
 		{
-			// > points piraniak
-			sendPBonus(0, getPropertie("plev"));
+			// > niveau
+			var level:int = getPropertie("plev");
+			if (level)
+				sendEvent(new BaseEvent(EventList.ADD_BONUS, {level:level}));
 			// > points piraniak
 			sendPBonus(1, getPropertie("ppir"));
 			// > points social
@@ -41,10 +43,10 @@ package ddgame.triggers {
 			complete();
 		}
 		
-		private function sendPBonus (t:int, b:int) : void
+		private function sendPBonus (i:int, b:int) : void
 		{
 			if (b)
-				sendEvent(new BaseEvent(EventList.ADD_BONUS, {theme:t, bonus:b}));
+				sendEvent(new BaseEvent(EventList.ADD_BONUS, {index:i, value:b}));
 		}
 		
 	}

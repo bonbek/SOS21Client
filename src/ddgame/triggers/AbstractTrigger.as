@@ -140,14 +140,16 @@ package ddgame.triggers {
 		 */
 		public function cancel () : void
 		{
-				// abonnement sur bob pour lancer réelement le trigger
 			if (getPropertie("_mb"))
 			{
 				var bob:AbstractTile = AbstractTile.getTile("bob");
-				bob.removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
-				bob.removeEventListener(TileEvent.MOVE_CANCELED, onMoveBob);
-				bob.stop();
-				bob.gotoAndStop("stand");
+				if (bob)
+				{
+					bob.removeEventListener(TileEvent.MOVE_COMPLETE, onMoveBob);
+					bob.removeEventListener(TileEvent.MOVE_CANCELED, onMoveBob);
+					bob.stop();
+					bob.gotoAndStop("stand");					
+				}
 			}
 
 			if (getPropertie("_fs")) {
@@ -280,8 +282,9 @@ package ddgame.triggers {
 			{
 				for (var p:String in bonus)
 				{
-					lastBonus.theme = bonusMap[p];
-					lastBonus.bonus = bonus[p];
+					lastBonus = (p == "plev") 	? {level:bonus[p]}
+														: {index:bonusIndexs[p], value:bonus[p]};
+
 					sendEvent(new BaseEvent(EventList.ADD_BONUS, lastBonus));
 				}
 			}
@@ -289,8 +292,8 @@ package ddgame.triggers {
 			sendEvent(new TriggerEvent(TriggerEvent.COMPLETE, this));
 		}
 		
-		protected static var lastBonus:Object = {theme:null, bonus:null};
-		protected static var bonusMap:Object = {plev:0, ppir:1, psoc:2, peco:3, penv:4};
+		protected static var lastBonus:Object;
+		protected static var bonusIndexs:Object = {ppir:0,psoc:1,peco:2,penv:3};
 		
 		protected function onDiffer () : void
 		{

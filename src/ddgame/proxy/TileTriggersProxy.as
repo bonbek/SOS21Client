@@ -203,9 +203,6 @@ package ddgame.proxy {
 				delete specMapTriggersProps[currentMap];
 				parse(toInject);
 			}
-				
-			
-			trace("info", this, "triggers parsed");
 		}
 		
 		public function getSpecMapTriggers (mapId:int):Array
@@ -796,7 +793,7 @@ package ddgame.proxy {
 				trigger.initialize();
 			}
 			else
-			{ trace("error", this, " class trigger:", props.triggerClassId, " non trouvée"); }
+			{ trace("Warning: class ", props.triggerClassId, " not found", " action", props.id); }
 		}
 		
 		/**
@@ -869,12 +866,15 @@ package ddgame.proxy {
 					trigger.properties.fireCount++;					
 					// on lance les overrides
 					writeOverrideTrigger(trigger, 0);
-					// envoie au serveur
-					serverProxy.triggerExecuted(trigger.properties.persist ? 0 : currentMap, trigger.properties.id);
+					
+					// Test send action
+					serverProxy.getServices("action").create(trigger.properties).save(null);
+					playerProxy.actionExecuted(trigger.properties.id, trigger.properties.persist ? "0" : String(currentMap));
+
 					break;
 				}
 				case TriggerEvent.COMPLETE :
-				{
+				{					
 					// on lance les overrides
 					writeOverrideTrigger(trigger, 1);
 					// lancement des triggers chainés

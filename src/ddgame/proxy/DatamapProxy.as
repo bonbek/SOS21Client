@@ -38,7 +38,7 @@ package ddgame.proxy {
 		//  CONSTRUCTOR
 		//--------------------------------------
 
-		public function DatamapProxy(sname:String = null, odata:Object = null)
+		public function DatamapProxy (sname:String = null, odata:Object = null)
 		{
 			super(sname == null ? NAME : sname, odata);
 		}
@@ -104,21 +104,24 @@ package ddgame.proxy {
 		{ return _data.camera.yOffset; }
 		
 		public function get avatarFactor () : Number
-		{ return _data.scaleFactor; }
+		{ return _data.camera.scale; }
 		
 		public function get enableNoMouseEventInAlpha () : Boolean
 		{ return true; }
 		
 		public function get location () : Object
 		{
-			return _data.location	? _data.location
-											: {adress:"",lat:0, lon:0};
+			if (!_data.location) _data.location = {adress:"",lat:0, lon:0};
+			return _data.location;
 		}
 		
 		public function get env () : Array
-		{ return _data.variables ? _data.variables : []; }
+		{
+			if (!_data.variables) _data.variables = [];			
+			return _data.variables;
+		}
 		
-		public function set data (value:Object):void
+		public function set data (value:Object) : void
 		{
 			if (_data)
 				_lastMapId = _data.id;

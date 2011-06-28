@@ -55,7 +55,7 @@ package ddgame.triggers {
 							ddgame.triggers.TileActionTrigger,
 							ddgame.triggers.WriteEnvTrigger,
 							ddgame.triggers.SoundTrigger
-							/*ddgame.triggers.ScriptTrigger*/
+//							ddgame.triggers.ScriptTrigger
 						]
 		}
 		

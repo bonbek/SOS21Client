@@ -97,7 +97,7 @@ package ddgame.proxy {
 				var c:CollisionCell = new CollisionCell(o.type);
 				c.cost = o.cost ? o.cost : 0;
 				if (!_grid.addCell(o.x, o.y, o.z, c))
-					trace("impossible d'insérer: cell - ux:" + o.x + " uy:" + o.y + " uz:" + o.z + " type collision:" + o.type);
+					trace("Warning: Can't insert cell - ux:" + o.x + " uy:" + o.y + " uz:" + o.z + " type collision:" + o.type);
 //				else
 //					trace("cell - ux:" + o.y + " uy:" + o.y + " uz:" + o.z + " type collision:" + o.type);
 			}

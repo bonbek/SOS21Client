@@ -41,7 +41,7 @@ package {
 		{
 			ConfigProxy.getInstance().setData(config);
 			var facade = ApplicationFacade.getInstance();
-			facade.startup(this, clientServer, userCredentials ? userCredentials : {login:"guest", password:"35675e68f4b5af7b995d9205ad0fc43842f16450"});
+			facade.startup(this, clientServer, userCredentials);
 
 			return facade;
 		}

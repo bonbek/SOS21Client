@@ -1,4 +1,5 @@
 package ddgame.triggers {
+	
 	import flash.geom.Point;
 	import flash.display.Stage;
 	import flash.events.Event;
@@ -6,14 +7,13 @@ package ddgame.triggers {
 	import flash.display.SimpleButton;
 	import flash.filters.GlowFilter;
 	import com.sos21.events.BaseEvent;
-	import com.sos21.debug.log;
 	import com.sos21.utils.Delegate;
 	import com.sos21.helper.AbstractHelper;
 	import com.sos21.events.ApplicationChannel;
 	import ddgame.triggers.AbstractTrigger;
 	import ddgame.events.TriggerEvent;
-	import ddgame.proxy.LibProxy;
-	import ddgame.events.ServerEventList;
+	import ddgame.proxy.*;
+	import ddgame.server.IClientServer;	;
 	import ddgame.events.EventList;
 	import ddgame.scene.PlayerHelper;
 	import ddgame.ui.components.Panel;
@@ -39,15 +39,6 @@ package ddgame.triggers {
 		//--------------------------------------
 		
 		public static const CLASS_ID:int = 3;
-		
-		public static const NEXT:String = "nextQ";
-		
-		//--------------------------------------
-		//  CONSTRUCTOR
-		//--------------------------------------
-
-		public function QuizTrigger()
-		{ }
 
 		//--------------------------------------
 		//  PRIVATE VARIABLES
@@ -66,13 +57,13 @@ package ddgame.triggers {
 		
 		public var data:Object;			// Data quiz
 		
-		public function get quiz():Quiz {
-			return _quiz;
-		}
+		// ?
+		public function get quiz() : Quiz
+		{ return _quiz; }
 		
-		override public function get classID():int {
-			return CLASS_ID;
-		}
+		// ?
+		override public function get classID() : int
+		{ return CLASS_ID; }
 		
 		//--------------------------------------
 		//  PUBLIC METHODS
@@ -83,29 +74,34 @@ package ddgame.triggers {
 		 */
 		override public function execute (event:Event = null) : void
 		{
-			if (!event)
+			// liste des qcm
+			_queue = String(properties.arguments["id"]).split("#");
+			if (isPropertie("mode") && _queue.length > 0)
 			{
-				// liste des qcm
-				_queue = String(properties.arguments["id"]).split("#");
-				if (isPropertie("mode") && _queue.length > 0)
+				// mode de tirage
+				var qmode:int = getPropertie("mode");
+
+				// ne pas réjouer qcm's déjà joués
+				if (qmode & 1)
+					removePlayedFromQueue();
+
+				// mode tirage aléatoire un dans la liste
+				if (qmode & 2)
 				{
-					// mode de tirage
-					var qmode:int = getPropertie("mode");
-
-					// ne pas réjouer qcm's déjà joués
-					if (qmode & 1)
-						removePlayedFromQueue();
-
-					// mode tirage aléatoire un dans la liste
-					if (qmode & 2)
-					{
-						var n:int = _queue.length;
-						if (n > 1)
-							_queue = [_queue[Math.ceil(Math.random() * n - 1)]];
-					}
+					var n:int = _queue.length;
+					if (n > 1)
+						_queue = [_queue[Math.ceil(Math.random() * n - 1)]];
 				}
-			}	
+			}
 			
+			nextQuiz();
+		}		
+		
+		/**
+		 *	Passe au quiz suivant
+		 */
+		public function nextQuiz () : void
+		{
 			if (_queue.length > 0)
 			{
 				sendEvent(new Event(EventList.FREEZE_SCENE));
@@ -113,62 +109,23 @@ package ddgame.triggers {
 			}
 			else
 			{
-				_release();	
-			}
-			
-		}
-		
-		/**
-		 *	Supprime les qcm déjà joués de la liste d'attente des qcm
-		 */
-		public function removePlayedFromQueue () : void
-		{
-			var l:int = played.length;
-			var ind:int;
-			while (--l > -1)
-			{
-				ind = _queue.indexOf(played[l]);
-				if (ind > -1)
-					_queue.splice(ind, 1);
+				complete();
 			}
 		}
 		
 		//--------------------------------------
 		//  EVENT HANDLERS
 		//--------------------------------------
-		
+
 		/*
-		*	Data event handler
+		*	Réception events Quiz's
 		*/
-		private function dataQuizHandler (event:BaseEvent) : void
-		{
-//			trace("data received");
-//			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
-			ApplicationChannel.getInstance().removeEventListener(ServerEventList.ON_DATAQUIZ, dataQuizHandler);
-			// on stock les data brutes
-			data = event.content;
-			
-			if (_quiz == null)
-				_initDisplay();
-				
-			// on construit le qcm
-			_quiz.clear();
-			_quiz.questionTitle = data.question;
-			_quiz.dataProvider = data.responses;
-			_quiz.explanation = data.explanation;
-			positionPanel();
-		}
-		
-		/*
-		*	Quiz events handlers
-		*/
-		private function quizEventHandler(event:QuizEvent):void
+		private function quizEventHandler (event:QuizEvent) : void
 		{
 			switch (event.type)
 			{
 				case QuizEvent.COMPLETE :
 				{
-					var classRef:Class;
 					if (_queue.length > 0)
 					{
 						_nextBtn = new Button("suite");
@@ -176,13 +133,14 @@ package ddgame.triggers {
 						_nextBtn.x = _panel.content.width - _nextBtn.width;
 						_nextBtn.addEventListener(MouseEvent.CLICK, panelHandler);
 						_panel.content.addChild(_nextBtn);
-					} else {
+					}
+					else
+					{
 						_closeBtn = new Button("fermer");
 						_closeBtn.y = _panel.content.height + 8;
 						_closeBtn.x = _panel.content.width - _closeBtn.width;
 						_closeBtn.addEventListener(MouseEvent.CLICK, _panel.close);
 						_panel.content.addChild(_closeBtn);
-//						complete();
 					}
 					break;
 				}
@@ -196,24 +154,25 @@ package ddgame.triggers {
 							var blist:Array = String(event.bonus).split("_");
 							var st:String;
 							var ind:int;
-							for (var i:int = 0; i < blist.length; i++) {
+							for (var i:int = 0; i < blist.length; i++)
+							{
 								st = blist[i];
 								ind = st.indexOf("#");
-								sendEvent(new BaseEvent(EventList.ADD_BONUS, {bonus:int(st.substring(0, ind)), theme:int(st.substring(ind + 1))}));
+								sendEvent(new BaseEvent(EventList.ADD_BONUS, {value:int(st.substring(0, ind)), index:int(st.substring(ind + 1))}));
 							}
 						}
-					} else {
-//						trace("Quiz déjà joué @" + toString());
 					}
 					break;
 				}
 			}
 		}
 		
-		/*
-		*	Panel events handler
-		*/
-		private function panelHandler(event:Event):void
+		
+		/**
+		 * Réception events panneau affichage quiz
+		 *	@param event Event
+		 */
+		private function panelHandler (event:Event) : void
 		{
 			switch (event.type)
 			{
@@ -224,18 +183,39 @@ package ddgame.triggers {
 						_panel.content.removeChild(_nextBtn);
 						_nextBtn.removeEventListener(MouseEvent.CLICK, panelHandler);
 						_nextBtn = null;
-						execute(new Event(NEXT));
+						// on passe au quiz suivant
+						nextQuiz();
 					}
 					break;
 				}
 				case Panel.CLOSE :
 				{
-					//trace("close");
-					_release();
+					complete();
 					sendEvent(new Event(EventList.UNFREEZE_SCENE));
 					break;
 				}
 			}
+		}
+		
+		/**
+		 * Réception données de quiz
+		 *	@param result Object
+		 */
+		private function handleDataQuiz (result:Object) : void
+		{
+			if (!result) nextQuiz();
+			
+			// on stock les data brutes
+			data = result;
+
+			if (_quiz == null) _initDisplay();
+
+			// on construit le qcm
+			_quiz.clear();
+			_quiz.questionTitle = data.question;
+			_quiz.dataProvider = data.responses;
+			_quiz.explanation = data.explanation;
+			positionPanel();
 		}
 		
 		//--------------------------------------
@@ -246,7 +226,7 @@ package ddgame.triggers {
 		 *	@private
 		 *	Lance la récupération des data d'un Qcm
 		 */
-		private function callForData():void
+		private function callForData () : void
 		{
 			var quizId:int = _queue.shift();
 			if (quizId > 0)
@@ -259,36 +239,41 @@ package ddgame.triggers {
 					{
 						if (data.id == quizId)
 						{
-							if (_quiz == null)
-								_initDisplay();
-
-							// on construit le qcm
-							_quiz.clear();
-							_quiz.questionTitle = data.question;
-							_quiz.dataProvider = data.responses;
-							_quiz.explanation = data.explanation;
-							positionPanel();
+							handleDataQuiz(data);
 							break;
 						}
 					}
 				}
-				else {
-					ApplicationChannel.getInstance().addEventListener(ServerEventList.ON_DATAQUIZ, dataQuizHandler);
-					sendPublicEvent(new BaseEvent(ServerEventList.GET_DATAQUIZ, quizId));
+				else
+				{
+					// Récup data depuis serveur
+					IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).getServices("quiz").load({keys:quizId},
+																																handleDataQuiz,
+																																handleDataQuiz);
 				}
 			}
 			else
 			{
-				if (sourceTarget)
-				{
-					sourceTarget.mouseEnabled = true;
-				}
-					
 				sendEvent(new Event(EventList.UNFREEZE_SCENE));
-				sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
-				super.complete();
+				complete();
 			}
 				
+		}
+		
+		/**
+		 *	Supprime les qcm déjà joués de la liste
+		 * d'attente des qcm
+		 */
+		private function removePlayedFromQueue () : void
+		{
+			var l:int = played.length;
+			var ind:int;
+			while (--l > -1)
+			{
+				ind = _queue.indexOf(played[l]);
+				if (ind > -1)
+					_queue.splice(ind, 1);
+			}
 		}
 		
 		/*
@@ -352,10 +337,10 @@ package ddgame.triggers {
 			}
 		}
 		
-		/*
-		*	Remove all listener and data reference
-		*/
-		private function _release():void
+		/**
+		 * @inheritDoc
+		 */
+		override public function release() : void
 		{
 			if (_panel)
 			{
@@ -380,26 +365,21 @@ package ddgame.triggers {
 			_queue = null;
 			
 			if (sourceTarget)
-			{
 				sourceTarget.mouseEnabled = true;
-//				sourceTarget.filters = [];
-			}
-			super.complete();
+
+			super.release();
 		}
 		
 		override protected function onDiffer():void
 		{
 			sendEvent(new Event(EventList.FREEZE_SCENE));
-			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, true));
 		}
 		
 		/*
 		*	Return lib proxy reference
 		*/
-		protected function get libProxy():LibProxy
-		{
-			return LibProxy(facade.getProxy(LibProxy.NAME));
-		}
+		protected function get libProxy() : LibProxy
+		{ return LibProxy(facade.getProxy(LibProxy.NAME)); }
 				
 	}
 	

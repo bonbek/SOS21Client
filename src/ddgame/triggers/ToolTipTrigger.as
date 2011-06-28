@@ -13,7 +13,6 @@ package ddgame.triggers {
 	import com.sos21.tileengine.core.AbstractTile;
 	import com.sos21.events.ApplicationChannel;
 	import ddgame.ui.UIHelper;
-	import ddgame.events.ServerEventList;
 	
 	/**
 	 *	Trigger ToolTip.

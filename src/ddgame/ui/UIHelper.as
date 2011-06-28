@@ -22,8 +22,7 @@ package ddgame.ui {
 	import ddgame.proxy.PlayerProxy;
 	import ddgame.proxy.DatamapProxy;
 	import ddgame.sound.AudioHelper;
-	
-	import ddgame.vo.IBonus;
+
 	import ddgame.scene.IsosceneHelper;
 
 	import gs.TweenMax;
@@ -70,7 +69,10 @@ package ddgame.ui {
 		{
 			return _component;
 		}
-
+		
+		public function set enabled (val:Boolean) : void
+		{ _component.enabled = val; }
+		
 		//--------------------------------------
 		//  PUBLIC METHODS
 		//--------------------------------------
@@ -162,7 +164,7 @@ package ddgame.ui {
 		 */
 		public function refreshUsername () : void
 		{
-			var uname:String = playerProxy.username;
+			var uname:String = playerProxy.pseudo;
 			if (uname) {
 				component.usernameWidget.enabled = true;
 				component.username = uname;
@@ -177,15 +179,15 @@ package ddgame.ui {
 		public function refreshBonus () : void
 		{
 			var blist:Array = playerProxy.allBonus;
-			for each (var b:IBonus in blist)
+			for (var i:int = 0; i < blist.length; i++)
 			{
-				component.updateBonus(b.theme, b.gain);
+				component.updateBonus(i, blist[i]);
 			}
 		}
 		
-		public function appendBonus (b:IBonus) : void
+		public function appendBonus (index:int, value:int) : void
 		{
-			component.appendBonus(b.theme, b.gain, true);
+			component.appendBonus(index, value, true);
 		}
 		
 		/*
@@ -196,10 +198,10 @@ package ddgame.ui {
 			if (component)
 			{
 				stage.addChild(component.sprite);
+				component.updateBonus(0, 0);
 				component.updateBonus(1, 0);
 				component.updateBonus(2, 0);
 				component.updateBonus(3, 0);
-				component.updateBonus(4, 0);
 
 				component.compassButton.addEventListener(MouseEvent.MOUSE_UP, handleButtonEvent);
 				component.soundButton.addEventListener(MouseEvent.MOUSE_UP, handleButtonEvent);
@@ -232,23 +234,29 @@ package ddgame.ui {
 					var dt:Object = {};
 					dt.classe = playerProxy.classe;
 					dt.level = playerProxy.level;
-					for each (var b:IBonus in blist)
+					var theme:XML;
+					for (var i:int; i < blist.length; i++)
 					{
-						switch (b.theme)
+						theme = cfdt.themes.theme.(@id == i)[0];
+						if (!theme) continue;
+
+						dt["gauge" + i] = {	descriptor:theme,
+													value:blist[i]	};
+						/*switch (i)
 						{
+							case 0 :
+								dt["gauge" + i] = cfdt.themes.theme.(@id == i).title + "  " + b.gain + "/10";
+								break;
 							case 1 :
-								dt["gauge" + b.theme] = cfdt.themes.theme.(@id == 1).title + "  " + b.gain + "/10";
+								dt["gauge" + i] = cfdt.themes.theme.(@id == i).title + "  " + b.gain + "/100";
 								break;
 							case 2 :
-								dt["gauge" + b.theme] = cfdt.themes.theme.(@id == 2).title + "  " + b.gain + "/100";
+								dt["gauge" + i] = b.gain + "/100  " + cfdt.themes.theme.(@id == 3).title;
 								break;
 							case 3 :
-								dt["gauge" + b.theme] = b.gain + "/100  " + cfdt.themes.theme.(@id == 3).title;
+								dt["gauge" + i] = b.gain + "/100  " + cfdt.themes.theme.(@id == 4).title;
 								break;
-							case 4 :
-								dt["gauge" + b.theme] = b.gain + "/100  " + cfdt.themes.theme.(@id == 4).title;
-								break;
-						}
+						}*/
 //						dt["gauge" + b.theme] = b.gain;
 					}
 					e.data = dt;
@@ -317,7 +325,7 @@ package ddgame.ui {
 		{
 			switch (event.type)
 			{
-				case EventList.APPLICATION_STARTUP :
+				case EventList.PLAYER_LOADED :
 				{
 					refreshUsername();
 					break;
@@ -326,33 +334,19 @@ package ddgame.ui {
 				case EventList.SCENE_BUILDED :
 				{
 					component.sceneTitle = datamapProxy.title;
-					
-					/*var fontList:Array = Font.enumerateFonts();
-					trace(this, "enum fonts");
-					for( var i:int=0; i<fontList.length; i++ )
-					{
-						trace(this, "font: " + fontList[ i ].fontName );
-					}*/
-					
-					break;
-				}
-				// > données utilisateur rafraichies
-				case EventList.PLAYER_REFRESHED :
-				{
+					// > rafraîchissement donnée joueur
 					refreshUsername();
 					refreshBonus();
 					break;
 				}
+				// Gain perte de points
 				case EventList.PLAYER_BONUS_GAIN :
 				{
-					var b:IBonus = BaseEvent(event).content as IBonus;
-					appendBonus(b);
-					break;
 				}
 				case EventList.PLAYER_BONUS_LOSS :
 				{
-					b = BaseEvent(event).content as IBonus;
-					appendBonus(b);	
+					var b:Object = BaseEvent(event).content;
+					appendBonus(b.index, b.value);
 					break;
 				}
 				case EventList.PLAYER_BONUS_CHANGED :
@@ -412,9 +406,7 @@ package ddgame.ui {
 		 */
 		override protected function listInterest () : Array
 		{
-			return [	EventList.APPLICATION_STARTUP,
-						EventList.SCENE_BUILDED,
-						EventList.PLAYER_REFRESHED,
+			return [	EventList.SCENE_BUILDED,
 						EventList.PLAYER_BONUS_CHANGED,
 						EventList.PLAYER_BONUS_GAIN,
 						EventList.PLAYER_BONUS_LOSS,

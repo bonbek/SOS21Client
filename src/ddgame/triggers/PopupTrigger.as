@@ -44,13 +44,6 @@ package ddgame.triggers {
 		public static const CLASS_ID:int = 2;
 		
 		//--------------------------------------
-		//  CONSTRUCTOR
-		//--------------------------------------
-
-		public function PopupTrigger()
-		{ }
-
-		//--------------------------------------
 		//  PRIVATE VARIABLES
 		//--------------------------------------
 		
@@ -84,7 +77,7 @@ package ddgame.triggers {
 			{
 //				var targ:String = isPropertie("target") ? getPropertie("target")  : "_blank";
 				
-				flash.net.navigateToURL(new URLRequest((isPropertie("relative") ? "" : "http://") + getPropertie("exturl")), isPropertie("target") ? getPropertie("target")  : "_blank");
+				flash.net.navigateToURL(new URLRequest(getPropertie("exturl")), isPropertie("target") ? getPropertie("target")  : "_blank");
 				complete();
 				return;
 			}
@@ -98,21 +91,13 @@ package ddgame.triggers {
 				var targ:String = isPropertie("target") ? getPropertie("target")  : "_blank";
 				flash.net.navigateToURL(new URLRequest("http://" + surl), targ);
 				complete();
-			} else {
+			}
+			else
+			{
 				_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loaderCompleteHandler);
 	         _loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 				_loader.load(new URLRequest(surl));
-				onDiffer();
 			}
-		}				
-		
-		/**
-		 *	@inheritDoc
-		 */
-		override protected function onDiffer():void
-		{
-			sendEvent(new Event(EventList.FREEZE_SCENE));
-			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, true));
 		}
 		
 		//--------------------------------------
@@ -136,7 +121,6 @@ package ddgame.triggers {
 		{
 		   trace(event + " @" + toString());
 			removeLoaderListener();
-			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
 			sendEvent(new Event(EventList.UNFREEZE_SCENE));
 		}
 		
@@ -151,7 +135,6 @@ package ddgame.triggers {
 			stage.removeChild(_content);
 			_content = null;
 			_loader = null;
-			sendEvent(new Event(EventList.UNFREEZE_SCENE));
 			complete();
 		}
 		
@@ -163,9 +146,7 @@ package ddgame.triggers {
 		 *	Initialisation et affichage de la popup chargée
 		 */
 		private function popupInit():void
-		{
-			sendEvent(new BaseEvent(EventList.DISPLAY_HOURGLASS, false));
-			
+		{			
 			if (_loader.content is AVM1Movie) { // test version du swf;
 				_content = new MovieClip();
 				_content.addChild(AVM1Movie(_loader.content));
@@ -227,12 +208,7 @@ package ddgame.triggers {
 				_content.y = UIHelper.VIEWPORT_AREA.y;				
 			}
 			
-			stage.addChild(_content);
-			// on lance un son
-			var classRef:Class = LibProxy(facade.getProxy(LibProxy.NAME)).lib.getClassFrom("uis/widgets.swf", "PopupSound");
-			var s:Sound;
-			s = new classRef();
-			s.play();			
+			stage.addChild(_content);		
 			TweenLite.from(_content, 1, {tint:0xFFFFFF});
 		}
 		

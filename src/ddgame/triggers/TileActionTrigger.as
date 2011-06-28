@@ -60,6 +60,7 @@ package ddgame.triggers {
 		private var currentTargetListener:Object;
 		private var currentTypeListener:String;
 		private var soundTrack:SoundTrack;
+		private var pnjHasBallonToRemove:Object;
 		
 		//--------------------------------------
 		//  GETTER/SETTERS
@@ -83,6 +84,9 @@ package ddgame.triggers {
 		
 		private function get libProxy () : LibProxy
 		{ return LibProxy(facade.getProxy(LibProxy.NAME)); }
+		
+		private function get isosceneHelper () : IsosceneHelper
+		{ return IsosceneHelper(facade.getObserver(IsosceneHelper.NAME)); }
 		
 		//--------------------------------------
 		//  PUBLIC METHODS
@@ -156,7 +160,14 @@ package ddgame.triggers {
 		 *	@param event Event
 		 */
 		protected function nextAction (event:Event = null) : void
-		{			
+		{
+			// ...
+			if (pnjHasBallonToRemove)
+			{
+				pnjHasBallonToRemove.removeBallon();
+				pnjHasBallonToRemove = null;
+			}
+			
 			// on enleve le listener si on était sur une action avec
 			// attente fin
 			if (event) removeWaitListener();
@@ -207,6 +218,8 @@ package ddgame.triggers {
 		{
 			// option freeze / unfreeze scène
 			if ("fs" in act) sendEvent(new BaseEvent(act.fs ? EventList.FREEZE_SCENE : EventList.UNFREEZE_SCENE));
+			
+			var sceneFreezed:Boolean = isosceneHelper.sceneFreezed;
 			
 			// option attendre fin
 			var wait:Boolean = act.we;
@@ -307,7 +320,8 @@ package ddgame.triggers {
 						var d:int = act.d * 1000;
 						var oc:Boolean = !d ? true : false;
 						var txt:String = act.p.txt;
-						var autoClose:Boolean = true;
+						var autoClose:Boolean = !sceneFreezed;
+
 						// liens
 						if (act.p.l)
 						{
@@ -319,20 +333,6 @@ package ddgame.triggers {
 							
 							txt += '<font size="6">\n\n</font>';
 							txt +=  la ? pls.join(" ") : pls.join("\n");
-							// on à des liens, check si on attend un clique obligatoire
-							// sur un de ceux-ci avant de passer à la suite.
-						//	if (getPropertie("_fs") && pls.length > 0) autoClose = false;
-						}
-						
-						if (wait)
-						{
-							if (d > 0) {
-								setTimer(d);
-							} 
-							else {
-								// On s'abonne aux events ballon, pour passer à la suite
-								addWaitListener(EventList.PNJ_BALLONEVENT, channel);
-							}
 						}
 
 						// Affichage selon type de ballon
@@ -341,6 +341,28 @@ package ddgame.triggers {
 						}
 						else {
 							pnj.displayTalk(txt, d, autoClose, oc, act.p.bw ? act.p.bw : 200);
+						}
+						
+						// Check manière de passer à l'action suivante
+						if (wait)
+						{
+							if (d > 0) {
+								setTimer(d);
+							} 
+							else {
+								if (!autoClose && !pnj.ballon.hasLink) {
+									// Pas de fermeture auto et pas de lien à cliquer,
+									// La scène est gelée, on considère que l'on attend un clique
+									// pour passer à la suite
+									pnjHasBallonToRemove = pnj;
+									addWaitListener(MouseEvent.MOUSE_DOWN, stage);
+								}
+								else {
+									// On attend signal fermeture ballon ou clique sur lien,
+									// (les liens sont définis en autoClose)
+									addWaitListener(EventList.PNJ_BALLON_CLOSED, channel);
+								}
+							}
 						}
 						
 					}

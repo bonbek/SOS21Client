@@ -41,7 +41,6 @@ package ddgame.commands {
 			
 			var path:Array = cP.findPath(pH.playerPosition, UPoint(BaseEvent(event).content));
 //			var path:Array = cP.findPath(pH.playerPosition, up);
-			
 			if(path.length > 1) {
 				// TODO déplacement au point cliqué précis
 				/*tp = iSH.component.sceneLayer.findFloatGridPoint(p);
