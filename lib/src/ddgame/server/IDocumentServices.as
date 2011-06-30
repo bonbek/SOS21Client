@@ -38,6 +38,24 @@ package ddgame.server {
 		 */
 		function create (data:Object = null) : IDatabaseDocument;
 		
+		/**
+		 * Sauvegarde de tout ou partie de données du document.
+		 *	@param params				paramètres de sauvegarde
+		 * 								en l'état, un tableau des proprités ex : ["title","hidden"]
+		 * 								ou null pour une sauvegarde de tout le document.
+		 *	@param successCallBack 	foncion de rappel en cas reussite
+		 *	@param faultCallBack 	function de rappel en cas d'echec
+		 */
+		function save (document:IDatabaseDocument, params:Object = null, successCallBack:Function = null, faultCallBack:Function = null) : void;
+
+		/**
+		 * Suppression du document côté serveur
+		 * La suppression côté client reste à la charge de l'application
+		 *	@param successCallBack 	foncion de rappel en cas reussite
+		 *	@param faultCallBack 	function de rappel en cas d'echec
+		 */
+		function destroy (document:IDatabaseDocument, successCallBack:Function = null, faultCallBack:Function = null) : void;
+		
 		//--------------------------------------
 		//  GETTER/SETTERS
 		//--------------------------------------

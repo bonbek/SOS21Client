@@ -46,6 +46,31 @@ package ddgame.server {
 			trace(this, "create");
 			return document;
 		}
+		
+		/**
+		 * Applique un retour d'erreur
+		 *	@param document IDatabaseDocument
+		 *	@param params Object
+		 *	@param successCallBack Function
+		 *	@param faultCallBack Function
+		 */
+		public function save (document:IDatabaseDocument, params:Object = null, successCallBack:Function = null, faultCallBack:Function = null) : void
+		{
+			trace(this, "save");
+			if (faultCallBack != null) faultCallBack.apply(null, [null]);
+		}
+
+		/**
+		 * Applique un retour d'erreur
+		 *	@param successCallBack 	foncion de rappel en cas reussite
+		 *	@param faultCallBack 	function de rappel en cas d'echec
+		 */
+		public function destroy (document:IDatabaseDocument, successCallBack:Function = null, faultCallBack:Function = null) : void
+		{
+			trace(this, "destroy");
+			if (faultCallBack != null) faultCallBack.apply(null, [null]);
+		}
+		
 	
 	}
 
