@@ -868,7 +868,9 @@ package ddgame.proxy {
 					writeOverrideTrigger(trigger, 0);
 					
 					// Test send action
-					serverProxy.getServices("action").create(trigger.properties).save(null);
+					serverProxy.getServices("action").create(	{player:playerProxy.getData(),
+																			place:dataMapProxy.getData(),
+																			action:trigger.properties}).save(null);
 					playerProxy.actionExecuted(trigger.properties.id, trigger.properties.persist ? "0" : String(currentMap));
 
 					break;
