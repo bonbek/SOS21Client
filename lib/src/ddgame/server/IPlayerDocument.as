@@ -48,6 +48,9 @@ package ddgame.server {
 		function get avatarSkin () : Object;
 		function set avatarSkin (val:Object) : void;
 		
+		function get place () : String;
+		function set place (val:String) : void;
+		
 		/**
 		 * Retourne l'indentifiant de la scène
 		 * "lieu de vie du joeur"
