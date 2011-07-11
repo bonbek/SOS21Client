@@ -476,11 +476,11 @@ package ddgame.proxy {
 				if (!t.persist) delete TriggerProperties.list[t.id];
 			}
 			
-//			TriggerProperties.list = new Dictionary(true);
 			TriggerProperties.lastHighestId = 5000;
 			TriggerProperties.linkedTriggerList = [];
-//			tileTriggerInstances = [];
-			tickMapTriggersProps = [];
+			tickMapTriggersProps = tickMapTriggersProps.filter(function (element:*, index:int, arr:Array):Boolean{
+				return element.persist;
+			});
 			var n:int = TriggerProperties.fireTypeList.length;
 			while (--n > -1)
 			{
