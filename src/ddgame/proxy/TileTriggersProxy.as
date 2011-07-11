@@ -806,7 +806,9 @@ package ddgame.proxy {
 			for each (var tr:TriggerProperties in oninitMapTriggersProps)
 				launchTrigger(tr);
 
-			oninitMapTriggersProps = [];
+			oninitMapTriggersProps = oninitMapTriggersProps.filter(function (element:*, index:int, arr:Array):Boolean{
+				return element.persist;
+			});
 
 			initMapExex = getTimer() - t;	
 		}
