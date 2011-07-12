@@ -5,19 +5,16 @@ package ddgame.commands {
 	import com.sos21.observer.Notifier;
 	import com.sos21.commands.ICommand;
 	import com.sos21.proxy.ConfigProxy;
-	import ddgame.events.EventList;
-	import ddgame.client.events.EventList;
-	import ddgame.client.commands.IsoworldInitCommand;
-	import ddgame.server.events.PublicServerEventList;
-	import ddgame.client.proxy.PlayerProxy;
-	import ddgame.view.FirstConnexionHelper;
-	import ddgame.proxy.ProxyList;
-	import ddgame.proxy.UserProxy;
-	import ddgame.client.proxy.TileTriggersProxy;
+	import ddgame.events.*;
+	import ddgame.commands.*;
+	import ddgame.proxy.*;
+	import ddgame.scene.*;
+	import ddgame.server.IClientServer;
+	import ddgame.ui.FirstConnexionHelper;
 	
 	/**
 	 *	Commande démarrage, switch sur module première connexion utilsateur
-	 * ou lancement du jeu. Cette command est lancée à partir de retour LOAD_USER (ON_USERLOADED)
+	 * ou lancement du jeu.
 	 *
 	 *	@langversion ActionScript 3.0
 	 *	@playerversion Flash 9.0
@@ -30,46 +27,90 @@ package ddgame.commands {
 		//  PUBLIC METHODS
 		//--------------------------------------
 		
-      public function execute (event:Event):void
+      public function execute (event:Event) : void
 		{
-			// initialiation de la partie client (jeu)
-			facade.registerCommand(ddgame.client.events.EventList.ISOWORLD_INIT, ddgame.client.commands.IsoworldInitCommand);
-			sendEvent(new BaseEvent(ddgame.client.events.EventList.ISOWORLD_INIT));
-			facade.unregisterCommand(ddgame.client.events.EventList.ISOWORLD_INIT);
+			// chargement place 0 (données globales) TODO
+			IClientServer(facade.getProxy(ProxyList.SERVER_PROXY)).getServices("place").load({keys:0},
+																														onGlobalsLoaded, onGlobalsLoaded);
+		}
+		
+		//---------------------------------------
+		// EVENT HANDLERS
+		//---------------------------------------
+		
+		/**
+		 * Réception chargement des data globales (place 0)
+		 *	@param result Object
+		 */
+		private function onGlobalsLoaded (document:Object) : void
+		{
+			// initialiation de la partie client
+			facade.registerCommand(EventList.GFXLIB_COMPLETE, ddgame.commands.BuildMapCommand, true);
+			
+			facade.registerCommand(EventList.MOVE_PLAYER, ddgame.commands.MovePlayerCommand);
+			facade.registerCommand(EventList.MOVE_TILE, ddgame.commands.MoveTileCommand);
+			facade.registerCommand(EventList.GOTO_MAP, ddgame.commands.ChangeMapCommand);
+			facade.registerCommand(EventList.ADD_BONUS, ddgame.commands.AddBonusCommand);
+			facade.registerCommand(EventList.LAUNCH_TRIGGER, ddgame.commands.LaunchTriggerCommand);
+			facade.registerCommand(EventList.PLAYER_ENTER_CELL, ddgame.commands.CheckGridTriggerCommand);
+			facade.registerCommand(EventList.PLAYER_LEAVE_CELL, ddgame.commands.CheckGridTriggerCommand);
+			facade.registerCommand(EventList.PLAY_SOUND, ddgame.commands.PlayStopSoundCommand);
+			facade.registerCommand(EventList.STOP_SOUND, ddgame.commands.PlayStopSoundCommand);
+			facade.registerCommand(EventList.PLAYSTOP_SOUND, ddgame.commands.PlayStopSoundCommand);
+			facade.registerCommand(EventList.INJECT_TRIGGER, ddgame.commands.InjectTriggerCommand);
+			facade.registerCommand(EventList.INJECT_TRIGGERARGS, ddgame.commands.InjectTriggerArgsCommand);
+			facade.registerCommand(EventList.WRITE_ENV, ddgame.commands.WriteEnvCommand);
+			facade.registerCommand(EventList.SCENE_BUILDED, ddgame.commands.BuildMapCommand);
+						
+			// Register Proxys
+			facade.registerProxy(LibProxy.NAME, new LibProxy());
+			facade.registerProxy(EnvProxy.NAME, new EnvProxy(document ? document : null));
+			facade.registerProxy(TileFactoryProxy.NAME, new TileFactoryProxy());
+			facade.registerProxy(TileTriggersProxy.NAME, new TileTriggersProxy());
+			facade.registerProxy(DatamapProxy.NAME, new DatamapProxy());
+			facade.registerProxy(ObjectBuilderProxy.NAME, new ObjectBuilderProxy());
+			
+			// Register Helpers
+			facade.registerObserver(IsosceneHelper.NAME, new IsosceneHelper());
+			facade.registerObserver(PlayerHelper.NAME, new PlayerHelper());
+			
+			// init data globales
+			// TODO trouver mieux
+			if (document)
+			{
+				DatamapProxy(facade.getProxy(DatamapProxy.NAME)).data = document;
+				TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)).parse(document.actions);
+				DatamapProxy(facade.getProxy(DatamapProxy.NAME)).data = null;		
+			}
 			
 			// on lance la chargement première scène
 			// > 1ére connection, le home du joueur, 2e et autre : dernière scène vistée
 			var playerProxy:PlayerProxy = PlayerProxy(facade.getProxy(ProxyList.PLAYER_PROXY));
-			var entryMap:int;
-			var fc:int = ConfigProxy.getInstance().data.maptoload.@force;			
+			var entryMap:String;
+			var fc:int = ConfigProxy.getInstance().data.maptoload.@force;
 			if (fc)
 			{
-				entryMap = int(ConfigProxy.getInstance().getContent("maptoload"));
+				entryMap = ConfigProxy.getInstance().getContent("maptoload");
 			}
-			else if (playerProxy.lastVisitedMapId)
+			else if (playerProxy.lastPlace)
 			{
-				entryMap = playerProxy.lastVisitedMapId;
+				entryMap = playerProxy.lastPlace;
 			}
-			else if (playerProxy.homeId)
+			else if (playerProxy.homePlace)
 			{
-				entryMap = playerProxy.homeId;
+				entryMap = playerProxy.homePlace;
 			}
 			else
 			{
-				entryMap = int(ConfigProxy.getInstance().getContent("maptoload"));
+				entryMap = ConfigProxy.getInstance().getContent("maptoload");
 			}
+
+			// Dispatch démarrage
+			sendEvent(new Event(EventList.APPLICATION_STARTUP));
+			sendPublicEvent(new Event(EventList.APPLICATION_STARTUP));			
 			
-//			trace(this, "entryMap: ", entryMap);
-			// passage référence cookie au Proxy trigger
-			//playerProxy.cookie.clear();
-			//TileTriggersProxy(facade.getProxy(TileTriggersProxy.NAME)).cookie = playerProxy.cookie;
-			
-			sendPublicEvent(new BaseEvent(PublicServerEventList.GET_DATAMAP, {mapId:entryMap}));
-			
-			// nettoyage des commandes à ne plus utiliser
-			facade.unregisterCommand(ddgame.events.EventList.APPLICATION_INIT);
-			facade.unregisterCommand(ddgame.events.EventList.APPLICATION_STARTUP);
-			facade.unregisterCommand(PublicServerEventList.ON_USER_LOADED);
+			// Chargement scène initiale
+			sendEvent(new BaseEvent(EventList.GOTO_MAP, {mapId:entryMap}));
 		}
 	}
 	

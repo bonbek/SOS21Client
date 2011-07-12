@@ -6,12 +6,12 @@ package ddgame {
 	import flash.events.Event;
 	import flash.display.DisplayObjectContainer;
 	import com.sos21.facade.Facade;
-	import com.sos21.events.EventChannelDispatcher;
-	import com.sos21.events.EventChannel;
-	import com.sos21.events.BaseEvent;
-	import ddgame.events.EventList;
-	import ddgame.server.events.PublicServerEventList;
+	import com.sos21.events.*;
+	import com.sos21.proxy.*;
 	import ddgame.commands.*;
+	import ddgame.proxy.*;
+	import ddgame.events.EventList;
+	import ddgame.server.IClientServer;
 	
 	/*
 	 *	front controller de l'appli
@@ -27,7 +27,7 @@ package ddgame {
 		// CLASS CONSTANTS
 		//--------------------------------------
 		
-		private static const CHANNEL:EventChannel = new EventChannel("ddgameChannel");
+		private static const CHANNEL:EventChannel = new EventChannel(ApplicationChannels.CLIENT_CHANNEL);
 		
 		//--------------------------------------
 		//  SINGLETON CONSTRUCTION
@@ -61,15 +61,47 @@ package ddgame {
 		//  PUBLIC METHODS
 		//--------------------------------------
 		
-		public function startup (stage:DisplayObjectContainer,  userCredentials:Object):void
+		/**
+		 * Point d'initialisation de l'application
+		 *	@param stage DisplayObjectContainer
+		 *	@param clientServer Object
+		 *	@param userCredentials Object
+		 */
+		public function startup (stage:DisplayObjectContainer, clientServer:Object, userCredentials:Object):void
 		{
-			sendEvent(new BaseEvent(EventList.APPLICATION_INIT, {documentRoot:stage, userCredentials:userCredentials}));
-			unregisterCommand(EventList.APPLICATION_INIT);
+			// Init de l'appli
+			sendEvent(new BaseEvent(EventList.APPLICATION_INIT, {documentRoot:stage}));
+
+			// Connection et recup utilisateur
+			registerProxy(ProxyList.SERVER_PROXY, clientServer as IClientServer);
+			clientServer.config = ConfigProxy.getInstance().getData().mods.services[0];
+			clientServer.connect(userCredentials, handleConnection);
 		}
 		
 		//--------------------------------------
 		//  EVENT HANDLERS
 		//--------------------------------------
+		
+		/**
+		 * Réception connection / data utilisateur
+		 *	@param user Object
+		 */
+		private function handleConnection (user:Object) : void
+		{
+			if (user)
+			{
+				// Démarrage en mode invité / ou utilisateur
+				sendEvent(new BaseEvent(user.isGuest 	? EventList.STARTIN_GUEST_MODE
+																	: EventList.STARTIN_USER_MODE, user));	
+			}
+			else {
+				sendEvent(new BaseEvent(EventList.APPLICATION_ABORT, {msg:"Vous n'êtes pas un autorisé"}));
+			}
+			
+			unregisterCommand(EventList.APPLICATION_INIT);
+			unregisterCommand(EventList.STARTIN_GUEST_MODE);
+			unregisterCommand(EventList.STARTIN_USER_MODE);
+		}
 		
 		//--------------------------------------
 		//  PRIVATE & PROTECTED INSTANCE METHODS
@@ -78,11 +110,9 @@ package ddgame {
 		override protected function initialize():void
       {
 			registerCommand(EventList.APPLICATION_INIT, ddgame.commands.AppInitCommand);
-			registerCommand(EventList.APPLICATION_STARTUP, ddgame.commands.AppStartupCommand);
-			registerCommand(EventList.REFRESH_USER, ddgame.commands.LoadUserCommand);
-			registerCommand(PublicServerEventList.ON_USER_LOADED, ddgame.commands.UserInitCommand);
-			registerCommand(PublicServerEventList.ON_PLAYER_CREATED, ddgame.commands.PlayerInitCommand);
-			registerCommand(PublicServerEventList.ON_PLAYER_LOADED, ddgame.commands.PlayerInitCommand);
+			registerCommand(EventList.APPLICATION_ABORT, ddgame.commands.AppAbortCommand);
+			registerCommand(EventList.STARTIN_GUEST_MODE, ddgame.commands.StartupGuestModeCommand);
+			registerCommand(EventList.STARTIN_USER_MODE, ddgame.commands.StartupUserModeCommand);
       }
 		
 	}

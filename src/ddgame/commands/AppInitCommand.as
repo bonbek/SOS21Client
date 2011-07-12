@@ -5,8 +5,6 @@ package ddgame.commands {
 	
 	import flash.events.Event;	
 	import flash.system.ApplicationDomain;
-	
-	import nl.demonsters.debugger.MonsterDebugger;
 
 	import com.sos21.observer.Notifier;
 	import com.sos21.commands.ICommand;
@@ -16,21 +14,18 @@ package ddgame.commands {
 
 	import ddgame.events.EventList;
 
-//	import ddgame.client.events.EventList; 
-	import ddgame.client.view.HelperList;
+	import ddgame.helper.HelperList;
 	import ddgame.commands.OpenMapScreenCommand;
 
 	import ddgame.proxy.ProxyList;
-	import ddgame.proxy.UserProxy;
-	import ddgame.view.ProgressLogoHelper;
-	import ddgame.view.UIHelper;
+	import ddgame.ui.ProgressLogoHelper;
+	import ddgame.ui.UIHelper;
 	import ddgame.sound.AudioHelper;
-	
-	import ddgame.server.commands.ServerInitCommand;
-	import ddgame.server.proxy.RemotingProxy;
-	import ddgame.server.events.ServerEventList;
-	import ddgame.server.events.PublicServerEventList;
-	import ddgame.client.view.MapScreenHelper;
+
+	import ddgame.proxy.ProxyList;
+	import ddgame.server.IClientServer;
+	import ddgame.commands.*;
+	import ddgame.ui.MapScreenHelper;
 	
 	/**
 	 *	Commande initialisation de l'appli, effectue
@@ -47,7 +42,7 @@ package ddgame.commands {
 		//  PUBLIC METHODS
 		//--------------------------------------
 		
-		public function execute(event:Event):void
+		public function execute (event:Event):void
 		{
 			// récup des data
 			var evtContent:Object = BaseEvent(event).content;
@@ -60,7 +55,7 @@ package ddgame.commands {
 			
 			// initialiation de l'interface
 			// check si on à une ui
-			var uiClass:Class
+			var uiClass:Class;
 			try
 			{
 				uiClass = ApplicationDomain.currentDomain.getDefinition("ddgame.display.ui.UI") as Class;
@@ -78,31 +73,6 @@ package ddgame.commands {
 			// TODO KK
 			var pr:ProgressLogoHelper = new ProgressLogoHelper();
 			facade.registerObserver(ProgressLogoHelper.NAME, pr);
-			
-			// initialization remoting
-			facade.registerCommand(ServerEventList.SERVER_INIT, ddgame.server.commands.ServerInitCommand);
-			var servicePath:String = ConfigProxy.getInstance().getContent("services_path");
-			sendEvent(new BaseEvent(ServerEventList.SERVER_INIT, {servicePath:servicePath}));
-			facade.unregisterCommand(ServerEventList.SERVER_INIT);
-			
-			// on lance la recup des datas utilisateur
-			var credentials:Object = evtContent.userCredentials;
-			if (credentials)
-			{
-				var rProxy:RemotingProxy = RemotingProxy(facade.getProxy(RemotingProxy.NAME));
-				// passage des autoristations utilisateur au serveur
-				rProxy.setCredentials(credentials.login, credentials.password);
-				// lancement recupération des données utilisateur
-				rProxy.getUserData(credentials.login, credentials.password);
-				
-//				var mdebbug:MonsterDebugger = new MonsterDebugger(evtContent.documentRoot.stage);
-				
-				trace(this, "Application initialized");
-			}
-			else
-			{
-				throw new Error("Acune autorisation utilisateur, application stopée");
-			}						
 		}
 		
 	}

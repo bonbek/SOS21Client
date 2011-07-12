@@ -7,6 +7,8 @@ package ddgame.sound {
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
 	import flash.media.SoundLoaderContext;
+	import org.osflash.signals.Signal;
+	import org.osflash.signals.ISignal;
 		
 	/**
 	 *	Objet piste son avec contrôle du volume et tête de lecture
@@ -22,13 +24,19 @@ package ddgame.sound {
 	 * funtion destroy ? à regarder si c'est nécéssaire d'avoir une méthode pour
 	 * bien cleaner
 	 * 
+	 * Dispatch : 	"complete" quand le son à été joué entièrement selon son nombre
+	 * 				de boucles
+	 * 				"loop" à chaque boucle
+	 * 				// autre à faire
+	 *
+	 * 
 	 * 
 	 *	@langversion ActionScript 3.0
 	 *	@playerversion Flash 9.0
 	 *
 	 *	@author toffer
 	 */
-	public class SoundTrack extends EventDispatcher {
+	public class SoundTrack extends Signal implements ISignal {
 	
 		//--------------------------------------
 		// CLASS CONSTANTS
@@ -185,7 +193,7 @@ package ddgame.sound {
 		
 		/**
 		 *	@param startTime Number
-		 *	@param loops int
+		 *	@param loops int 0 pour jouer en boucle
 		 *	@param sndTransform SoundTransform
 		 *	@return SoundChannel
 		 */
@@ -197,7 +205,8 @@ package ddgame.sound {
 			// et pour les méthode pause / resume
 			if (_position > 0) startTime = _position;
 			
-			_channel = _sound.play(startTime, loops, sndTransform);
+			_channel = _sound.play(startTime, 1, sndTransform);
+			_channel.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
 			
 			// le volume est mémorisé pour toute la durée
 			// de vie de cet instance SoundTrack
@@ -214,9 +223,7 @@ package ddgame.sound {
 			_loops = loops;
 			_isPlaying = true;
 			
-			// TODO
-			if (_loops == -1)
-				_channel.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
+			dispatch("play");
 			
 			return _channel;
 		}
@@ -244,6 +251,8 @@ package ddgame.sound {
 			_channel.stop();
 			_position = -1;
 			_isPlaying = false;
+
+			dispatch("stop");
 		}
 		
 		/**
@@ -257,6 +266,8 @@ package ddgame.sound {
 			_channel.removeEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
 			_channel.stop();
 			_isPlaying = false;
+			
+			dispatch("pause");			
 		}
 		
 		/**
@@ -269,6 +280,7 @@ package ddgame.sound {
 			if (_position > -1)
 			{
 				play(_position, _loops);
+				dispatch("resume");
 			}
 		}
 		
@@ -283,6 +295,8 @@ package ddgame.sound {
 			volume = 0;			
 			_volume = lv;
 			_mute = true;
+			
+			dispatch("mute");
 		}
 		
 		/**
@@ -294,6 +308,8 @@ package ddgame.sound {
 			
 			_mute = false;
 			volume = _volume;
+
+			dispatch("unMute");
 		}
 		
 		//--------------------------------------
@@ -309,7 +325,17 @@ package ddgame.sound {
 			_isPlaying = false;
 			_position = -1;
 			_channel.removeEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
-			play(0, _loops);
+
+			// Test relance
+			if (--_loops != 0)
+			{
+				dispatch("loop");
+				play(0, _loops);
+			}
+			else
+			{
+				dispatch("complete");
+			}
 		}
 		
 		//--------------------------------------
